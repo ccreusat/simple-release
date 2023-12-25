@@ -1,4 +1,5 @@
 import { simpleGit } from "simple-git";
+import { isConventional } from "./is-commit-conventional.js";
 
 const git = simpleGit();
 
@@ -16,12 +17,14 @@ git.tags((error, tags) => {
     console.log("No tag found");
   }
 
-  git.log({ from: lastTag }, (err, commits) => {
-    if (err) {
-      console.error("Something wrong happened:", err);
+  git.log({ from: lastTag }, (error, commits) => {
+    if (error) {
+      console.error("Something wrong happened:", error);
       return;
     }
 
-    console.log("Commits since last tag:", commits.all);
+    console.log("Commits since last tag:", commits.all.length);
+
+    commits.all.forEach(isConventional);
   });
 });
