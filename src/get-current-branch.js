@@ -8,10 +8,7 @@ git.branch((err, BranchSummaryResult) => {
     return;
   }
 
-  const allBranches = BranchSummaryResult.all;
   const currentBranch = BranchSummaryResult.current;
 
-  console.log("All branches:", allBranches);
-  console.log(allBranches.includes(currentBranch));
-  console.log("Current branch", currentBranch);
+  console.log(`Current branch is ${currentBranch}`);
 });

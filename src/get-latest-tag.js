@@ -2,21 +2,17 @@ import { simpleGit } from "simple-git";
 
 const git = simpleGit();
 
-export function getLastTag() {
-  git.tags((err, tags) => {
-    if (err) {
-      console.error("Something wrong happened", err);
-      return;
-    }
+git.tags((error, tags) => {
+  if (error) {
+    console.error("Something wrong happened", error);
+    return;
+  }
 
-    const lastTag = tags.latest;
+  const lastTag = tags.latest;
 
-    if (!lastTag) {
-      console.log("No tag found");
-      return;
-    }
+  if (lastTag) {
     console.log("Last tag is:", lastTag);
-  });
-}
-
-getLastTag();
+  } else {
+    console.log("No tag found");
+  }
+});
