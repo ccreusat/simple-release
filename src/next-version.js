@@ -31,16 +31,16 @@ git.tags((error, tags) => {
       return;
     }
 
-    console.log("First commit after last tag:", firstCommitAfterTag);
-
     if (firstCommitAfterTag.message.startsWith("fix")) {
       nextVersion = "patch";
     } else if (firstCommitAfterTag.message.startsWith("feat")) {
       nextVersion = "minor";
     } else if (firstCommitAfterTag.message.startsWith("chore")) {
       nextVersion = "patch";
-    } else {
+    } else if (firstCommitAfterTag.message.includes("!")) {
       nextVersion = "major";
+    } else {
+      nextVersion = "patch";
     }
 
     console.log(`NextVersion: ${nextVersion}`);
