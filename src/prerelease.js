@@ -1,4 +1,5 @@
 import { getConfig } from "./find-cosmiconfig.js";
+import { getCurrentBranch } from "./get-current-branch";
 
 /* Create a pre-release version and create git tag */
 export async function prerelease() {
