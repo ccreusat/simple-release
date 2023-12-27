@@ -39,14 +39,14 @@ async function run() {
       process.exit(1);
     }
     // Exécutez la commande npm version prerelease avec le préfixe de version
-    const result = await execa("npm", [
+    const { stdout } = await execa("npm", [
       "version",
       "prerelease",
       "--preid",
       versionPrefix,
     ]);
-    console.log(result);
-    console.log(chalk.green(result));
+    console.log({ stdout });
+    console.log(chalk.green(stdout));
   } catch (error) {
     console.error(chalk.red(`Unable to version "${currentBranch}"`));
     process.exit(1);
