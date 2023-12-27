@@ -3,6 +3,7 @@ import chalk from "chalk";
 
 const git = simpleGit();
 
+/* Get git status, if working tree is clean or not */
 export async function getGitStatus() {
   try {
     const status = await git.status();
