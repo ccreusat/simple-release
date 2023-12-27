@@ -1,14 +1,16 @@
 import { simpleGit } from "simple-git";
+import chalk from "chalk";
 
 const git = simpleGit();
 
-git.status((err, StatusResult) => {
-  console.log(StatusResult);
+export async function getGitStatus() {
+  try {
+    const status = await git.status();
 
-  if (StatusResult.files.length !== 0) {
-    console.error("Working tree is not clean");
-    return;
+    // if (status.files.length !== 0) throw new Error();
+
+    return status.files.length === 0;
+  } catch (error) {
+    console.error(chalk.red("Working tree is not clean"));
   }
-
-  console.error("Everything is clear!");
-});
+}
