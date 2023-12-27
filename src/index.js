@@ -56,7 +56,7 @@ async function run() {
       process.exit(1);
     }
     // Exécutez la commande npm version prerelease avec le préfixe de version
-    const result = await execa("npm", [
+    const { stdout } = await execa("npm", [
       "version",
       "prerelease",
       "--preid",
