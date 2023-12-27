@@ -2,13 +2,11 @@ import { simpleGit } from "simple-git";
 
 const git = simpleGit();
 
-git.branch((err, BranchSummaryResult) => {
-  if (err) {
-    console.error("Something wrong happened", err);
-    return;
+export async function getCurrentBranch() {
+  try {
+    const branch = await git.branch();
+    return branch.current;
+  } catch (error) {
+    console.error(error);
   }
-
-  const currentBranch = BranchSummaryResult.current;
-
-  console.log(`Current branch is ${currentBranch}`);
-});
+}

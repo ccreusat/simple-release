@@ -1,0 +1,14 @@
+{
+    "generateNotes": true,
+    "release": [
+        "main",
+        "master"
+    ],
+    "prerelease": [
+        "alpha",
+        "beta",
+        "next"
+    ],
+    "version": true,
+    "publish": true
+}
