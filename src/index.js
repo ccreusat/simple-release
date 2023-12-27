@@ -39,7 +39,7 @@ async function prerelease() {
       "alpha",
     ]);
 
-    console.log({ result });
+    console.log(chalk.green(stdout));
   } catch (error) {
     console.log(error);
     // console.error(chalk.red(`${error}`));
