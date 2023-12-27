@@ -22,7 +22,7 @@ async function run() {
       process.exit(1);
     }
     // Exécutez la commande npm version prerelease avec le préfixe de version
-    await prerelease(preid);
+    await prerelease();
   } catch (error) {
     console.error(chalk.red(`Unable to version "${currentBranch}"`));
     process.exit(1);
