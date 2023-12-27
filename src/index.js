@@ -32,14 +32,21 @@ function getVersionPreid() {
 async function run() {
   try {
     const versionPrefix = getVersionPreid();
-
     const isClean = await getGitStatus();
 
-    console.log(isClean);
-
-    if (!isClean) return;
+    if (!isClean) {
+      console.error(chalk.red("Working tree is not clean"));
+      process.exit(1);
+    }
     // Exécutez la commande npm version prerelease avec le préfixe de version
-    await execa("npm", ["version", "prerelease", "--preid", versionPrefix]);
+    const result = await execa("npm", [
+      "version",
+      "prerelease",
+      "--preid",
+      versionPrefix,
+    ]);
+    console.log(result);
+    console.log(chalk.green(result));
   } catch (error) {
     console.error(chalk.red(`Unable to version "${currentBranch}"`));
     process.exit(1);
@@ -47,5 +54,3 @@ async function run() {
 }
 
 run();
-
-// console.log(config.prerelease.includes(CURRENT_BRANCH));
