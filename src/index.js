@@ -32,7 +32,7 @@ function getVersionPreid() {
 
 async function prerelease() {
   try {
-    const result = await execa("npm", [
+    const { stdout } = await execa("npm", [
       "version",
       "prerelease",
       "--preid",
