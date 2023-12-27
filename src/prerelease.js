@@ -1,4 +1,4 @@
-import { getConfig } from "./find-cosmiconfig";
+import { getConfig } from "./find-cosmiconfig.js";
 
 /* Create a pre-release version and create git tag */
 export async function prerelease() {
