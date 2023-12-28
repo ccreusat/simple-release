@@ -14,6 +14,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "emitDeclarationOnly": false,
+    "declarationDir": "dist",
 
     /* Linting */
     "strict": true,
@@ -21,5 +23,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src/**/*", "vite.config.ts", "rollup.config.js"]
 }

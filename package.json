@@ -1,13 +1,14 @@
 {
   "name": "simple-release",
   "private": true,
-  "version": "0.0.1-alpha.6",
+  "version": "0.0.1-undefined.2",
   "type": "module",
   "bin": {
     "releaz": "./dist/index.js"
   },
   "scripts": {
-    "build": "rm -rf dist && rollup -c"
+    "build-rollup": "rm -rf dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "build": "vite build"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",

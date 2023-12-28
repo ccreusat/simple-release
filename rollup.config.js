@@ -19,10 +19,7 @@ export default {
   watch: {
     include: "src/**",
   },
-  external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-  ],
+  external: [...Object.keys(pkg.dependencies || {})],
   plugins: [
     json(),
     resolve({ extensions: [".js", ".ts"] }),

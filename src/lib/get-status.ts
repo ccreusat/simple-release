@@ -8,10 +8,11 @@ export async function getGitStatus() {
   try {
     const status = await git.status();
 
-    // if (status.files.length !== 0) throw new Error();
+    if (status.files.length !== 0) throw new Error();
 
     return status.files.length === 0;
   } catch (error) {
     console.error(chalk.red("Working tree is not clean"));
+    process.exit(1);
   }
 }

@@ -1,5 +1,4 @@
 {
-    "generateNotes": true,
     "release": [
         "main",
         "master"
@@ -8,7 +7,5 @@
         "alpha",
         "beta",
         "next"
-    ],
-    "version": true,
-    "publish": true
+    ]
 }
