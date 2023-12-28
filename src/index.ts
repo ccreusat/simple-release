@@ -1,11 +1,12 @@
-#!/usr/bin/env node
+#!/usr/bin/env ts-node
 
 import chalk from "chalk";
 
-import { getConfig } from "./find-cosmiconfig.js";
-import { getCurrentBranch } from "./get-current-branch.js";
-import { getGitStatus } from "./get-status.js";
-import { prerelease } from "./prerelease.js";
+import { getConfig } from "./lib/find-cosmiconfig";
+import { getCurrentBranch } from "./lib/get-current-branch";
+import { getGitStatus } from "./lib/get-status";
+import { prerelease } from "./lib/prerelease";
+import { checkIsRepo } from "./lib/check-is-repo";
 
 const config = await getConfig();
 
@@ -15,6 +16,9 @@ const currentBranch = await getCurrentBranch();
 
 async function run() {
   try {
+    const isGitRepo = await checkIsRepo();
+    if (!isGitRepo) return;
+
     const isClean = await getGitStatus();
 
     if (!isClean) {

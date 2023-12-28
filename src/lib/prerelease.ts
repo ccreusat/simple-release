@@ -1,6 +1,7 @@
-import { getConfig } from "./find-cosmiconfig.js";
-import { getCurrentBranch } from "./get-current-branch.js";
+import { getConfig } from "./find-cosmiconfig";
+import { getCurrentBranch } from "./get-current-branch";
 import { execa } from "execa";
+import chalk from "chalk";
 
 /* Create a pre-release version and create git tag */
 export async function prerelease() {
@@ -9,7 +10,7 @@ export async function prerelease() {
     const currentBranch = await getCurrentBranch();
 
     const preid = prerelease.find(
-      (prereleaseBranch) => prereleaseBranch === currentBranch
+      (prereleaseBranch: string) => prereleaseBranch === currentBranch
     );
 
     console.log({ preid, currentBranch });

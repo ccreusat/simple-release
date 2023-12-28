@@ -4,14 +4,20 @@
   "version": "0.0.1-alpha.5",
   "type": "module",
   "bin": {
-    "releaz": "./src/index.js"
+    "releaz": "./dist/index.js"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "rm -rf dist && rollup -c"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/node": "^20.10.5",
+    "rollup": "^4.9.1",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.2",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   },

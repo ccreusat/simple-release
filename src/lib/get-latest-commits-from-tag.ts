@@ -1,5 +1,5 @@
 import { simpleGit } from "simple-git";
-import { isConventional } from "./is-commit-conventional.js";
+import { isConventional } from "./is-commit-conventional";
 
 const git = simpleGit();
 
