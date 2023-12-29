@@ -78,6 +78,24 @@ async function getCurrentBranch() {
   }
 }
 
+async function getLastTag() {
+  try {
+    const tags = await git.tags();
+    const lastTag = tags.latest;
+
+    if (!lastTag) throw new Error();
+
+    console.log(
+      "🚀 ~ file: index.ts:58 ~ lastTag:",
+      chalk.greenBright(lastTag)
+    );
+    return lastTag;
+  } catch (error) {
+    console.error(chalk.redBright("No tag found", error));
+    process.exit(1);
+  }
+}
+
 async function getLastCommits() {
   try {
     const tags = await git.tags();
@@ -101,11 +119,22 @@ async function getLastCommits() {
   }
 }
 
+function isVersion(pkgVersion: string, tagVersion: string) {
+  console.log({ pkgVersion, tagVersion });
+
+  console.log(pkgVersion === tagVersion ? chalk.green(true) : chalk.red(false));
+}
+
 // Using try-catch for better error handling
 try {
   await isInitialized();
-  await getStatus();
+  // await getStatus();
   await getCurrentBranch();
+
+  const lastTag = await getLastTag();
+  const tagVersion = lastTag.split("v")[1];
+
+  isVersion(pkg.version, tagVersion);
 
   const nextVersion = getNextVersion(pkg.version, {
     type: "patch",
