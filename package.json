@@ -1,6 +1,6 @@
 {
   "name": "phnx",
-  "private": true,
+  "private": false,
   "version": "0.0.1-alpha.7",
   "type": "module",
   "bin": {
@@ -10,6 +10,9 @@
     "build": "rm -rf dist && rollup --config rollup.config.js",
     "watch": "pnpm run build --watch"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@types/node": "20.10.5",
     "typescript": "5.2.2"
