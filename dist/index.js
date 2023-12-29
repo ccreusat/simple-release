@@ -9,6 +9,7 @@ const moduleName = "phnx";
 const explorer = cosmiconfig(moduleName);
 const git = simpleGit();
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+console.log("🚀 ~ file: index.ts:78 ~ pkg:", pkg.version);
 async function getConfig() {
     try {
         const result = await explorer.search();
@@ -62,7 +63,7 @@ async function getCurrentBranch() {
         process.exit(1);
     }
 }
-async function getLatestCommits() {
+async function getLastCommits() {
     try {
         const tags = await git.tags();
         const lastTag = tags.latest;
@@ -80,7 +81,6 @@ async function getLatestCommits() {
         process.exit(1);
     }
 }
-console.log("🚀 ~ file: index.ts:78 ~ pkg:", pkg.version);
 // Using try-catch for better error handling
 try {
     await isInitialized();
@@ -92,7 +92,7 @@ try {
     });
     console.log("🚀 ~ file: index.ts:90 ~ nextVersion:", chalk.greenBright(nextVersion));
     await getConfig();
-    const allCommits = await getLatestCommits();
+    const allCommits = await getLastCommits();
     console.log("🚀 ~ file: index.ts:94 ~ allCommits:", chalk.greenBright(allCommits.length));
     // Continue with the rest of your logic here...
 }

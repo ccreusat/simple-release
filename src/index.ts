@@ -13,6 +13,8 @@ const pkg = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url), "utf8")
 );
 
+console.log("🚀 ~ file: index.ts:78 ~ pkg:", pkg.version);
+
 async function getConfig() {
   try {
     const result = await explorer.search();
@@ -76,7 +78,7 @@ async function getCurrentBranch() {
   }
 }
 
-async function getLatestCommits() {
+async function getLastCommits() {
   try {
     const tags = await git.tags();
     const lastTag = tags.latest;
@@ -99,8 +101,6 @@ async function getLatestCommits() {
   }
 }
 
-console.log("🚀 ~ file: index.ts:78 ~ pkg:", pkg.version);
-
 // Using try-catch for better error handling
 try {
   await isInitialized();
@@ -117,7 +117,7 @@ try {
   );
 
   await getConfig();
-  const allCommits = await getLatestCommits();
+  const allCommits = await getLastCommits();
   console.log(
     "🚀 ~ file: index.ts:94 ~ allCommits:",
     chalk.greenBright(allCommits.length)
