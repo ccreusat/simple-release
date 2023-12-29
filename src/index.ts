@@ -162,7 +162,7 @@ try {
 
   await git.add(filesToAdd);
   await git.commit(`chore: test version: ${nextVersion}`);
-  await git.push();
+  await git.push("origin", "alpha");
   // Continue with the rest of your logic here...
 } catch (error) {
   console.error(chalk.redBright("An error occurred:"), error);
