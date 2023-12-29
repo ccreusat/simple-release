@@ -1,31 +1,29 @@
 {
-  "name": "simple-release",
+  "name": "phnx",
   "private": true,
-  "version": "0.0.1-undefined.2",
+  "version": "0.0.1-alpha.2",
   "type": "module",
   "bin": {
-    "releaz": "./dist/index.js"
+    "phnx": "./dist/index.js"
   },
   "scripts": {
-    "build-rollup": "rm -rf dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "build": "vite build"
+    "build": "rm -rf dist && rollup --config rollup.config.js",
+    "watch": "pnpm run build --watch"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.5",
-    "@types/node": "^20.10.5",
-    "rollup": "^4.9.1",
-    "ts-node": "^10.9.2",
-    "tslib": "^2.6.2",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "@types/node": "20.10.5",
+    "typescript": "5.2.2"
   },
   "dependencies": {
-    "chalk": "^5.3.0",
-    "cosmiconfig": "^9.0.0",
-    "execa": "^8.0.1",
-    "simple-git": "^3.21.0"
+    "@rollup/plugin-commonjs": "25.0.7",
+    "@rollup/plugin-json": "6.1.0",
+    "@rollup/plugin-node-resolve": "15.2.3",
+    "@rollup/plugin-typescript": "11.1.5",
+    "chalk": "5.3.0",
+    "cosmiconfig": "9.0.0",
+    "execa": "8.0.1",
+    "simple-git": "3.21.0",
+    "tslib": "2.6.2",
+    "version-next": "1.0.2"
   }
 }

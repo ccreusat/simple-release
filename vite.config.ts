@@ -11,7 +11,10 @@ export default defineConfig({
       formats: ["es"],
     },
     rollupOptions: {
-      external: [...Object.keys(pkg.dependencies || {})],
+      external: [
+        ...Object.keys(pkg.dependencies || {}),
+        ...Object.keys(pkg.devDependencies || {}),
+      ],
       /* output: {
         preserveModules: true,
         preserveModulesRoot: "src",
