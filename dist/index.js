@@ -5,7 +5,7 @@ import { cosmiconfig } from 'cosmiconfig';
 import { simpleGit } from 'simple-git';
 import { getNextVersion } from 'version-next';
 
-const moduleName = "phnix";
+const moduleName = "phnx";
 const explorer = cosmiconfig(moduleName);
 const git = simpleGit();
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
