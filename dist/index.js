@@ -9,14 +9,16 @@ const moduleName = "phnx";
 const explorer = cosmiconfig(moduleName);
 const git = simpleGit();
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-console.log("🚀 ~ file: index.ts:78 ~ pkg:", pkg.version);
+console.log(chalk.bgMagentaBright(pkg.version));
 async function getConfig() {
     try {
         const result = await explorer.search();
         if (!result || !result.config) {
             throw new Error();
         }
-        return result.config;
+        const config = result.config;
+        console.log(chalk.yellowBright(JSON.stringify(config)));
+        return config;
     }
     catch (error) {
         console.error(chalk.redBright.bold("No config file found"));
@@ -28,8 +30,7 @@ async function isInitialized() {
         const isInitialized = await git.checkIsRepo();
         if (!isInitialized)
             throw new Error();
-        console.log(chalk.greenBright("Le repo est déjà initialisé."));
-        console.log("🚀 ~ file: index.ts:42 ~ isInitialized:", chalk.green(isInitialized));
+        console.log(chalk.bgGreenBright("Le repo est déjà initialisé."));
         return isInitialized;
     }
     catch (error) {
@@ -41,7 +42,7 @@ async function getCurrentBranch() {
     try {
         const branchSummary = await git.branch();
         const currentBranch = branchSummary.current;
-        console.log("🚀 ~ file: index.ts:84 ~ currentBranch:", chalk.greenBright(currentBranch));
+        console.log("currentBranch", chalk.greenBright(currentBranch));
         return branchSummary.current;
     }
     catch (error) {
@@ -51,11 +52,11 @@ async function getCurrentBranch() {
 }
 async function getLastTag() {
     try {
-        const tags = await git.tags();
-        const lastTag = tags.latest;
+        const tag = await git.raw(["describe", "--tags", "--abbrev=0"]);
+        const lastTag = tag.trim();
         if (!lastTag)
             throw new Error();
-        console.log("🚀 ~ file: index.ts:58 ~ lastTag:", chalk.greenBright(lastTag));
+        console.log("lastTag", chalk.greenBright(lastTag));
         return lastTag;
     }
     catch (error) {
@@ -65,15 +66,8 @@ async function getLastTag() {
 }
 async function getLastCommits() {
     try {
-        const tags = await git.tags();
-        const lastTag = tags.latest;
-        if (lastTag) {
-            console.log("🚀 ~ file: index.ts:58 ~ lastTag:", chalk.greenBright(lastTag));
-        }
-        else {
-            console.log("No tag found");
-        }
-        const commits = await git.log({ from: lastTag });
+        const lastTag = await getLastTag();
+        const commits = await git.log({ from: lastTag, to: "HEAD" });
         return commits.all;
     }
     catch (error) {
@@ -81,24 +75,24 @@ async function getLastCommits() {
         process.exit(1);
     }
 }
-function isVersion(pkgVersion, tagVersion) {
-    console.log({ pkgVersion, tagVersion });
-    console.log(pkgVersion === tagVersion ? chalk.green(true) : chalk.red(false));
+function isSameVersion(pkgVersion, tagVersion) {
+    const isSameVersion = pkgVersion === tagVersion ? chalk.blueBright(true) : chalk.red(false);
+    console.log("isSameVersion", isSameVersion);
 }
 // Using try-catch for better error handling
 try {
+    await getConfig();
     await isInitialized();
     // await getStatus();
     await getCurrentBranch();
     const lastTag = await getLastTag();
     const tagVersion = lastTag.split("v")[1];
-    isVersion(pkg.version, tagVersion);
+    isSameVersion(pkg.version, tagVersion);
     const nextVersion = getNextVersion(pkg.version, {
         type: "patch",
         stage: "alpha",
     });
-    console.log("🚀 ~ file: index.ts:90 ~ nextVersion:", chalk.greenBright(nextVersion));
-    await getConfig();
+    console.log("nextVersion", chalk.greenBright(nextVersion));
     const allCommits = await getLastCommits();
     console.log("🚀 ~ file: index.ts:94 ~ allCommits:", chalk.greenBright(allCommits.length));
     // Continue with the rest of your logic here...
