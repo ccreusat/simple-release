@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { cosmiconfig } from 'cosmiconfig';
 import { simpleGit } from 'simple-git';
 import { getNextVersion } from 'version-next';
+import 'execa';
 
 const moduleName = "phnx";
 const explorer = cosmiconfig(moduleName);
@@ -81,10 +82,9 @@ function isSameVersion(pkgVersion, tagVersion) {
 }
 // Using try-catch for better error handling
 try {
-    await getConfig();
+    const config = await getConfig();
+    const currentBranch = await getCurrentBranch();
     await isInitialized();
-    // await getStatus();
-    await getCurrentBranch();
     const lastTag = await getLastTag();
     const tagVersion = lastTag.split("v")[1];
     isSameVersion(pkg.version, tagVersion);
@@ -95,6 +95,15 @@ try {
     console.log("nextVersion", chalk.greenBright(nextVersion));
     const allCommits = await getLastCommits();
     console.log("🚀 ~ file: index.ts:94 ~ allCommits:", chalk.greenBright(allCommits.length));
+    // await getStatus();
+    // await versionPrerelease(config.prerelease, currentBranch);
+    // Lister les fichiers du working tree
+    const statusSummary = await git.status();
+    const filesToAdd = statusSummary.files.map((file) => file.path);
+    console.log({ filesToAdd });
+    await git.add(filesToAdd);
+    await git.commit(`chore: test version: ${nextVersion}`);
+    await git.push();
     // Continue with the rest of your logic here...
 }
 catch (error) {
