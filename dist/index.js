@@ -103,7 +103,7 @@ try {
     console.log({ filesToAdd });
     await git.add(filesToAdd);
     await git.commit(`chore: test version: ${nextVersion}`);
-    await git.push("origin", "alpha");
+    await git.push("origin", currentBranch);
     // Continue with the rest of your logic here...
 }
 catch (error) {
