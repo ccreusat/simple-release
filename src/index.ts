@@ -20,13 +20,13 @@ async function getConfig() {
   try {
     const result = await explorer.search();
     if (!result || !result.config) {
-      throw new Error();
+      throw new Error("No config file found");
     }
     const config = result.config;
     console.log(chalk.yellowBright(JSON.stringify(config)));
     return config;
   } catch (error) {
-    console.error(chalk.redBright.bold("No config file found"));
+    console.error(chalk.redBright.bold(`${error.message}`));
     process.exit(1);
   }
 }
@@ -127,12 +127,35 @@ async function versionPrerelease(prerelease: string[], currentBranch: string) {
   console.log(chalk.green(stdout));
 }
 
+async function shouldBeReleaseorPrerelease() {
+  try {
+    const currentBranch = await getCurrentBranch();
+    const config = await getConfig();
+
+    let result;
+
+    if (config.release.includes(currentBranch)) {
+      result = "release";
+    }
+
+    if (config.prerelease.includes(currentBranch)) {
+      result = "prerelease";
+    }
+
+    console.log(chalk.bgBlueBright(result));
+    return result;
+  } catch (error) {
+    console.log(chalk.red(error));
+    process.exit(1);
+  }
+}
+
 // Using try-catch for better error handling
 try {
+  await isInitialized();
+
   const config = await getConfig();
   const currentBranch = await getCurrentBranch();
-
-  await isInitialized();
 
   const lastTag = await getLastTag();
   const tagVersion = lastTag.split("v")[1];
