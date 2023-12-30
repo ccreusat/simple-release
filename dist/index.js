@@ -87,6 +87,13 @@ try {
     const currentBranch = await getCurrentBranch();
     const lastTag = await getLastTag();
     const tagVersion = lastTag.split("v")[1];
+    fs.readFile(`${process.cwd()}/.phnxrc`, "utf8", (err, data) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        console.log({ data });
+    });
     isSameVersion(pkg.version, tagVersion);
     const nextVersion = getNextVersion(pkg.version, {
         type: "patch",
