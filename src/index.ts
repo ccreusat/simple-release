@@ -167,14 +167,17 @@ try {
     }
     console.log({ data });
 
+    const parsedData = JSON.parse(data);
     const content = (JSON.parse(data).lastRelease = lastTag);
 
-    fs.writeFile(`${process.cwd()}/.phnxrc`, content, (err) => {
+    console.log(parsedData);
+
+    /* fs.writeFile(`${process.cwd()}/.phnxrc`, content, (err) => {
       if (err) {
         console.error(err);
       }
       // file written successfully
-    });
+    }); */
   });
 
   isSameVersion(pkg.version, tagVersion);
