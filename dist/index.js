@@ -63,6 +63,29 @@ async function getLastTag() {
     process.exit(1);
   }
 }
+
+async function shouldBeReleaseorPrerelease() {
+  try {
+    const currentBranch = await getCurrentBranch();
+    const config = await getConfig();
+
+    let result;
+
+    if (config.release.includes(currentBranch)) {
+      result = "release";
+    }
+
+    if (config.prerelease.includes(currentBranch)) {
+      result = "prerelease";
+    }
+
+    console.log(chalk.bgBlueBright(result));
+    return result;
+  } catch (error) {
+    console.log(chalk.red(error));
+  }
+}
+
 async function getLastCommits() {
   try {
     const lastTag = await getLastTag();
@@ -73,15 +96,17 @@ async function getLastCommits() {
     process.exit(1);
   }
 }
+
 function isSameVersion(pkgVersion, tagVersion) {
   const isSameVersion =
     pkgVersion === tagVersion ? chalk.blueBright(true) : chalk.red(false);
   console.log("isSameVersion", isSameVersion);
 }
-// Using try-catch for better error handling
+
 try {
   const config = await getConfig();
   const currentBranch = await getCurrentBranch();
+  await shouldBeReleaseorPrerelease();
   await isInitialized();
   const lastTag = await getLastTag();
   const tagVersion = lastTag.split("v")[1];
