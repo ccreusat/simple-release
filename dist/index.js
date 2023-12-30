@@ -79,6 +79,8 @@ async function shouldBeReleaseorPrerelease() {
       result = "prerelease";
     }
 
+    throw new Error();
+
     console.log(chalk.bgBlueBright(result));
     return result;
   } catch (error) {
