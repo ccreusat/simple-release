@@ -168,6 +168,15 @@ try {
     console.log({ data });
   });
 
+  const content = `lastRelease:${lastTag}`;
+
+  fs.writeFile(`${process.cwd()}/.phnxrc`, content, (err) => {
+    if (err) {
+      console.error(err);
+    }
+    // file written successfully
+  });
+
   isSameVersion(pkg.version, tagVersion);
 
   const nextVersion = getNextVersion(pkg.version, {
