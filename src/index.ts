@@ -166,15 +166,15 @@ try {
       return;
     }
     console.log({ data });
-  });
 
-  const content = `lastRelease:${lastTag}`;
+    const content = (JSON.parse(data).lastRelease = lastTag);
 
-  fs.writeFile(`${process.cwd()}/.phnxrc`, content, (err) => {
-    if (err) {
-      console.error(err);
-    }
-    // file written successfully
+    fs.writeFile(`${process.cwd()}/.phnxrc`, content, (err) => {
+      if (err) {
+        console.error(err);
+      }
+      // file written successfully
+    });
   });
 
   isSameVersion(pkg.version, tagVersion);
