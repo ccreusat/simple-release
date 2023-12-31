@@ -65,6 +65,8 @@ async function incrementVersion(pkgVersion: number, releaseType: string) {
     stage: PRERELEASE_BRANCH.includes(currentBranch) ? currentBranch : "",
   });
 
+  console.log({ nextVersion });
+
   return nextVersion;
 }
 
@@ -244,7 +246,7 @@ async function run() {
 
   const releaseNote = "Contenu de la release note...\n\nAutres détails...";
 
-  createReleaseNote(owner, repo, nextVersion, token, releaseNote);
+  // createReleaseNote(owner, repo, nextVersion, token, releaseNote);
   // generateReleaseNote(owner, repo, token);
 }
 
