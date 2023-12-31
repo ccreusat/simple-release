@@ -3,6 +3,7 @@ import { execa } from "execa";
 import { readFileSync, writeFileSync } from "fs";
 import simpleGit, { DefaultLogFields, ListLogLine } from "simple-git";
 import { getNextVersion } from "version-next";
+import { PRERELEASE_BRANCH } from "./constants/default-branch";
 
 const git = simpleGit();
 
@@ -60,7 +61,7 @@ async function incrementVersion(pkgVersion: number, releaseType: string) {
 
   const nextVersion = getNextVersion(String(pkgVersion), {
     type: releaseType,
-    stage: currentBranch,
+    stage: PRERELEASE_BRANCH.includes(currentBranch) ? currentBranch : "",
   });
 
   return nextVersion;

@@ -4,6 +4,8 @@ import { readFileSync, writeFileSync } from 'fs';
 import simpleGit from 'simple-git';
 import { getNextVersion } from 'version-next';
 
+const PRERELEASE_BRANCH = ["alpha", "beta", "rc", "next"];
+
 const git = simpleGit();
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 async function getLastTag() {
@@ -47,7 +49,7 @@ async function incrementVersion(pkgVersion, releaseType) {
     const currentBranch = await getCurrentBranch();
     const nextVersion = getNextVersion(String(pkgVersion), {
         type: releaseType,
-        stage: currentBranch,
+        stage: PRERELEASE_BRANCH.includes(currentBranch) ? currentBranch : "",
     });
     return nextVersion;
 }
