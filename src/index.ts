@@ -161,6 +161,7 @@ async function createReleaseNote(owner, repo, tag, token, releaseNote) {
 
     console.log(`Release créée avec succès : ${response.data.html_url}`);
   } catch (error) {
+    console.error(error);
     console.error("Erreur lors de la création de la release :", error.message);
   }
 }
@@ -246,7 +247,7 @@ async function run() {
 
   const releaseNote = "Contenu de la release note...\n\nAutres détails...";
 
-  // createReleaseNote(owner, repo, nextVersion, token, releaseNote);
+  createReleaseNote(owner, repo, nextVersion, token, releaseNote);
   // generateReleaseNote(owner, repo, token);
 }
 
