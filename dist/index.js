@@ -79,9 +79,9 @@ function determineReleaseType(commits, commitCounts) {
     const hasBreakingChange = commits.some((commit) => commit.message.includes("BREAKING CHANGE") || commit.message.includes("!"));
     const finalReleaseType = hasBreakingChange
         ? "major"
-        : mostFrequentType.type === "fix" || mostFrequentType.type === "chore"
-            ? "patch"
-            : "minor";
+        : mostFrequentType.type === "feat"
+            ? "minor"
+            : "patch";
     return finalReleaseType;
 }
 function updatePackageJson(version) {

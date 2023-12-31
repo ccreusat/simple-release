@@ -112,9 +112,9 @@ function determineReleaseType(
 
   const finalReleaseType = hasBreakingChange
     ? "major"
-    : mostFrequentType.type === "fix" || mostFrequentType.type === "chore"
-    ? "patch"
-    : "minor";
+    : mostFrequentType.type === "feat"
+    ? "minor"
+    : "patch";
 
   return finalReleaseType;
 }
