@@ -18544,36 +18544,6 @@ async function createReleaseNote(owner, repo, tag, token, releaseNote) {
         console.error("Erreur lors de la création de la release :", error.message);
     }
 }
-function prepareReleaseNote(commits) {
-    let releaseNote = "## Release Note\n\n";
-    /* const formatedCommits = commits.map((commit) => {
-      return {
-        message: commit.message,
-        author: commit.author_name,
-      };
-    }); */
-    for (const type in commits) {
-        console.log({ type });
-        if (type === "fix") {
-            releaseNote += `### Fixes\n\n`;
-            for (const commit of commits[type]) {
-                releaseNote += `- ${commit.message}. Thank you ${commit.author_name}\n`;
-            }
-            releaseNote += "\n";
-        }
-        if (type === "chore") {
-            releaseNote += `### Chore\n\n`;
-            for (const commit of commits[type]) {
-                releaseNote += `- ${commit.message}. Thank you ${commit.author_name}\n`;
-            }
-            releaseNote += "\n";
-        }
-    }
-    console.log({ releaseNote });
-    return releaseNote;
-    /* console.log(commits.map((commit) => commit)); */
-    // return formatedCommits;
-}
 function groupCommitsByType(commits) {
     const groupedCommits = {};
     for (const commit of commits) {
@@ -18603,8 +18573,9 @@ async function run() {
     const repo = "simple-release";
     // const token = process.env.GITHUB_TOKEN;
     const token = "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";
-    const groupCommits = groupCommitsByType(commits);
-    const releaseNote = prepareReleaseNote(groupCommits);
+    groupCommitsByType(commits);
+    // const releaseNote = prepareReleaseNote(groupCommits);
+    const releaseNote = "Contenu de la release note...\n\nAutres détails...";
     createReleaseNote(owner, repo, nextVersion, token, releaseNote);
     // generateReleaseNote(owner, repo, token);
 }

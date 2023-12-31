@@ -240,7 +240,9 @@ async function run() {
   const token = "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";
 
   const groupCommits = groupCommitsByType(commits);
-  const releaseNote = prepareReleaseNote(groupCommits);
+  // const releaseNote = prepareReleaseNote(groupCommits);
+
+  const releaseNote = "Contenu de la release note...\n\nAutres détails...";
 
   createReleaseNote(owner, repo, nextVersion, token, releaseNote);
   // generateReleaseNote(owner, repo, token);
