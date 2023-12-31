@@ -68,7 +68,7 @@ async function incrementVersion(pkgVersion: number, releaseType: string) {
   return nextVersion;
 }
 
-function parseCommits(commits: readonly (DefaultLogFields & ListLogLine)[]) {
+function parsedCommits(commits: readonly (DefaultLogFields & ListLogLine)[]) {
   const commitCounts: CommitCounts[] = [];
 
   for (const commit of commits) {
@@ -131,8 +131,6 @@ async function pushContent(nextVersion: string) {
   const statusSummary = await git.status();
   const filesToAdd = statusSummary.files.map((file) => file.path);
 
-  console.log({ filesToAdd });
-
   await git.add(filesToAdd);
   await git.commit(`chore: release: ${nextVersion}`);
   await git.push("origin", currentBranch);
@@ -165,39 +163,79 @@ async function createReleaseNote(owner, repo, tag, token, releaseNote) {
 }
 
 function prepareReleaseNote(commits) {
-  return commits.map((commit) => {
+  let releaseNote = "## Release Note\n\n";
+  /* const formatedCommits = commits.map((commit) => {
     return {
       message: commit.message,
       author: commit.author_name,
     };
-  });
+  }); */
+
+  for (const type in commits) {
+    console.log({ type });
+    if (type === "fix") {
+      releaseNote += `### Fixes\n\n`;
+      for (const commit of commits[type]) {
+        releaseNote += `- ${commit.message}. Thank you ${commit.author_name}\n`;
+      }
+      releaseNote += "\n";
+    }
+    if (type === "chore") {
+      releaseNote += `### Chore\n\n`;
+      for (const commit of commits[type]) {
+        releaseNote += `- ${commit.message}. Thank you ${commit.author_name}\n`;
+      }
+      releaseNote += "\n";
+    }
+  }
+
+  console.log({ releaseNote });
+
+  return releaseNote;
+
+  /* console.log(commits.map((commit) => commit)); */
+  // return formatedCommits;
+}
+
+function groupCommitsByType(commits) {
+  const groupedCommits = {};
+
+  for (const commit of commits) {
+    const match = commit.message.match(/^(chore|fix|feat):/i);
+
+    if (match && match[1]) {
+      const type = match[1].toLowerCase();
+      if (!groupedCommits[type]) {
+        groupedCommits[type] = [];
+      }
+      groupedCommits[type].push(commit);
+    }
+  }
+
+  return groupedCommits;
 }
 
 async function run() {
   const commits = await getLastCommits();
-  const commitCounts = parseCommits(commits);
+  const commitCounts = parsedCommits(commits);
   const releaseType = determineReleaseType(commits, commitCounts);
 
   const nextVersion = await incrementVersion(pkg.version, releaseType);
 
-  console.log({ commitCounts, releaseType, nextVersion });
+  updatePackageJson(nextVersion);
 
-  /* updatePackageJson(nextVersion); */
-
-  /* await execa("git", ["tag", `v${nextVersion}`]);
-  await execa("git", ["push", "--tags"]); */
+  await execa("git", ["tag", `v${nextVersion}`]);
+  await execa("git", ["push", "--tags"]);
 
   // Remplacez les valeurs suivantes par vos informations GitHub
   const owner = "ccreusat";
   const repo = "simple-release";
-  // const token = "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";
   const token = process.env.GITHUB_TOKEN;
 
-  console.log({ commits });
+  const groupCommits = groupCommitsByType(commits);
+  const releaseNote = prepareReleaseNote(groupCommits);
 
-  // const releaseNote = "Contenu de la release note...\n\nAutres détails...";
-
-  // createReleaseNote(owner, repo, nextVersion, token, releaseNote);
+  createReleaseNote(owner, repo, nextVersion, token, releaseNote);
   // generateReleaseNote(owner, repo, token);
 }
 
