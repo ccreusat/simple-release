@@ -1,5 +1,6 @@
 import chalk from 'chalk';
-import { readFileSync } from 'fs';
+import { execa } from 'execa';
+import { readFileSync, writeFileSync } from 'fs';
 import simpleGit from 'simple-git';
 import { getNextVersion } from 'version-next';
 
@@ -7,8 +8,9 @@ const git = simpleGit();
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 async function getLastTag() {
     try {
-        const tag = await git.raw(["describe", "--tags", "--abbrev=0"]);
-        const lastTag = tag.trim();
+        const tag = await git.tags();
+        const lastTag = tag.latest;
+        console.log({ tag });
         if (!lastTag)
             throw new Error();
         console.log("lastTag", chalk.greenBright(lastTag));
@@ -44,7 +46,6 @@ async function getCurrentBranch() {
 }
 async function incrementVersion(pkgVersion, releaseType) {
     const currentBranch = await getCurrentBranch();
-    console.log({ pkgVersion });
     const nextVersion = getNextVersion(String(pkgVersion), {
         type: releaseType,
         stage: currentBranch,
@@ -81,23 +82,19 @@ function determineReleaseType(commits, commitCounts) {
             : "minor";
     return finalReleaseType;
 }
+function updatePackageJson(version) {
+    const path = `${process.cwd()}/package.json`;
+    const packageJson = JSON.parse(readFileSync(path, "utf-8"));
+    packageJson.version = version;
+    writeFileSync(path, JSON.stringify(packageJson, null, 2), "utf-8");
+}
 async function run() {
     const commits = await getLastCommits();
     const commitCounts = parseCommits(commits);
     const releaseType = determineReleaseType(commits, commitCounts);
-    // isSemantic();
     const nextVersion = await incrementVersion(pkg.version, releaseType);
-    console.log({ nextVersion });
-    // console.log({ commitMessages, releaseType });
-    /* if (releaseType !== "none") {
-      const currentVersion = "1.0.0"; // Remplacez par la version actuelle de votre projet
-      const newVersion = incrementVersion(currentVersion, releaseType);
-      console.log(`Incrémenter la version de ${currentVersion} à ${newVersion}`);
-      updatePackageJson(newVersion);
-    } else {
-      console.log(
-        "Aucun changement majeur ou correctif détecté. Aucune incrémentation de version nécessaire."
-      );
-    } */
+    updatePackageJson(nextVersion);
+    await execa("git", ["tag", `v${nextVersion}`]);
+    await execa("git", ["push", "--tags"]);
 }
 run();
