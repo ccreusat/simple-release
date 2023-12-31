@@ -236,7 +236,8 @@ async function run() {
   // Remplacez les valeurs suivantes par vos informations GitHub
   const owner = "ccreusat";
   const repo = "simple-release";
-  const token = process.env.GITHUB_TOKEN;
+  // const token = process.env.GITHUB_TOKEN;
+  const token = "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";
 
   const groupCommits = groupCommitsByType(commits);
   const releaseNote = prepareReleaseNote(groupCommits);
