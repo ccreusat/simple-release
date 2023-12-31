@@ -10,7 +10,6 @@ async function getLastTag() {
     try {
         const tag = await git.tags();
         const lastTag = tag.latest;
-        console.log({ tag });
         if (!lastTag)
             throw new Error();
         console.log("lastTag", chalk.greenBright(lastTag));
