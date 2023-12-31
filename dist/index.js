@@ -18574,7 +18574,8 @@ async function run() {
     const owner = "ccreusat";
     const repo = "simple-release";
     // const token = process.env.GITHUB_TOKEN;
-    const token = "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";
+    // const token = "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";
+    const token = "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";
     groupCommitsByType(commits);
     // const releaseNote = prepareReleaseNote(groupCommits);
     const releaseNote = "Contenu de la release note...\n\nAutres détails...";
