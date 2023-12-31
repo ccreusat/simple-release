@@ -18524,6 +18524,7 @@ async function pushContent(nextVersion) {
     await git.push("origin", currentBranch);
 }
 async function createReleaseNote(owner, repo, tag, token, releaseNote) {
+    console.log({ owner, repo, tag, token, releaseNote });
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
     try {
         // Créer une nouvelle release en utilisant l'API GitHub
@@ -18594,7 +18595,7 @@ async function run() {
     const nextVersion = await incrementVersion(pkg.version, releaseType);
     updatePackageJson(nextVersion);
     console.log({ releaseType, nextVersion });
-    pushContent(nextVersion);
+    await pushContent(nextVersion);
     await execa("git", ["tag", `v${nextVersion}`]);
     await execa("git", ["push", "--tags"]);
     // Remplacez les valeurs suivantes par vos informations GitHub

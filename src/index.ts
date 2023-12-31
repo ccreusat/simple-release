@@ -126,7 +126,7 @@ function updatePackageJson(version: string): void {
   writeFileSync(path, JSON.stringify(packageJson, null, 2), "utf-8");
 }
 
-async function await pushContent(nextVersion: string) {
+async function pushContent(nextVersion: string) {
   const currentBranch = await getCurrentBranch();
   const statusSummary = await git.status();
   const filesToAdd = statusSummary.files.map((file) => file.path);
@@ -137,6 +137,7 @@ async function await pushContent(nextVersion: string) {
 }
 
 async function createReleaseNote(owner, repo, tag, token, releaseNote) {
+  console.log({ owner, repo, tag, token, releaseNote });
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
 
   try {
