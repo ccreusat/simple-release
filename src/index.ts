@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from "fs";
 import simpleGit, { DefaultLogFields, ListLogLine } from "simple-git";
 import { getNextVersion } from "version-next";
 import { PRERELEASE_BRANCH } from "./constants/default-branch";
+import axios from "axios";
 
 const git = simpleGit();
 
@@ -125,6 +126,53 @@ function updatePackageJson(version: string): void {
   writeFileSync(path, JSON.stringify(packageJson, null, 2), "utf-8");
 }
 
+async function pushContent(nextVersion: string) {
+  const currentBranch = await getCurrentBranch();
+  const statusSummary = await git.status();
+  const filesToAdd = statusSummary.files.map((file) => file.path);
+
+  console.log({ filesToAdd });
+
+  await git.add(filesToAdd);
+  await git.commit(`chore: release: ${nextVersion}`);
+  await git.push("origin", currentBranch);
+}
+
+async function createReleaseNote(owner, repo, tag, token, releaseNote) {
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
+
+  try {
+    // Créer une nouvelle release en utilisant l'API GitHub
+    const response = await axios.post(
+      apiUrl,
+      {
+        tag_name: tag,
+        name: `Release ${tag}`,
+        body: releaseNote,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      }
+    );
+
+    console.log(`Release créée avec succès : ${response.data.html_url}`);
+  } catch (error) {
+    console.error("Erreur lors de la création de la release :", error.message);
+  }
+}
+
+function prepareReleaseNote(commits) {
+  return commits.map((commit) => {
+    return {
+      message: commit.message,
+      author: commit.author_name,
+    };
+  });
+}
+
 async function run() {
   const commits = await getLastCommits();
   const commitCounts = parseCommits(commits);
@@ -132,10 +180,25 @@ async function run() {
 
   const nextVersion = await incrementVersion(pkg.version, releaseType);
 
-  updatePackageJson(nextVersion);
+  console.log({ commitCounts, releaseType, nextVersion });
 
-  await execa("git", ["tag", `v${nextVersion}`]);
-  await execa("git", ["push", "--tags"]);
+  /* updatePackageJson(nextVersion); */
+
+  /* await execa("git", ["tag", `v${nextVersion}`]);
+  await execa("git", ["push", "--tags"]); */
+
+  // Remplacez les valeurs suivantes par vos informations GitHub
+  const owner = "ccreusat";
+  const repo = "simple-release";
+  // const token = "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";
+  const token = process.env.GITHUB_TOKEN;
+
+  console.log({ commits });
+
+  // const releaseNote = "Contenu de la release note...\n\nAutres détails...";
+
+  // createReleaseNote(owner, repo, nextVersion, token, releaseNote);
+  // generateReleaseNote(owner, repo, token);
 }
 
 run();

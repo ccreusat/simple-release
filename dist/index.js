@@ -1,6 +1,5 @@
 import chalk from 'chalk';
-import { execa } from 'execa';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import simpleGit from 'simple-git';
 import { getNextVersion } from 'version-next';
 
@@ -83,19 +82,17 @@ function determineReleaseType(commits, commitCounts) {
             : "minor";
     return finalReleaseType;
 }
-function updatePackageJson(version) {
-    const path = `${process.cwd()}/package.json`;
-    const packageJson = JSON.parse(readFileSync(path, "utf-8"));
-    packageJson.version = version;
-    writeFileSync(path, JSON.stringify(packageJson, null, 2), "utf-8");
-}
 async function run() {
     const commits = await getLastCommits();
     const commitCounts = parseCommits(commits);
     const releaseType = determineReleaseType(commits, commitCounts);
     const nextVersion = await incrementVersion(pkg.version, releaseType);
-    updatePackageJson(nextVersion);
-    await execa("git", ["tag", `v${nextVersion}`]);
-    await execa("git", ["push", "--tags"]);
+    console.log({ commitCounts, releaseType, nextVersion });
+    // const token = "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";
+    process.env.GITHUB_TOKEN;
+    console.log({ commits });
+    // const releaseNote = "Contenu de la release note...\n\nAutres détails...";
+    // createReleaseNote(owner, repo, nextVersion, token, releaseNote);
+    // generateReleaseNote(owner, repo, token);
 }
 run();
