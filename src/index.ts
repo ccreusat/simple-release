@@ -126,7 +126,7 @@ function updatePackageJson(version: string): void {
   writeFileSync(path, JSON.stringify(packageJson, null, 2), "utf-8");
 }
 
-async function pushContent(nextVersion: string) {
+async function await pushContent(nextVersion: string) {
   const currentBranch = await getCurrentBranch();
   const statusSummary = await git.status();
   const filesToAdd = statusSummary.files.map((file) => file.path);
@@ -217,12 +217,17 @@ function groupCommitsByType(commits) {
 
 async function run() {
   const commits = await getLastCommits();
+
   const commitCounts = parsedCommits(commits);
   const releaseType = determineReleaseType(commits, commitCounts);
 
   const nextVersion = await incrementVersion(pkg.version, releaseType);
 
   updatePackageJson(nextVersion);
+
+  console.log({ releaseType, nextVersion });
+
+  await pushContent(nextVersion);
 
   await execa("git", ["tag", `v${nextVersion}`]);
   await execa("git", ["push", "--tags"]);

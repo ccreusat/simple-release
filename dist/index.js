@@ -18515,6 +18515,14 @@ function updatePackageJson(version) {
     packageJson.version = version;
     writeFileSync(path, JSON.stringify(packageJson, null, 2), "utf-8");
 }
+async function pushContent(nextVersion) {
+    const currentBranch = await getCurrentBranch();
+    const statusSummary = await git.status();
+    const filesToAdd = statusSummary.files.map((file) => file.path);
+    await git.add(filesToAdd);
+    await git.commit(`chore: release: ${nextVersion}`);
+    await git.push("origin", currentBranch);
+}
 async function createReleaseNote(owner, repo, tag, token, releaseNote) {
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
     try {
@@ -18585,6 +18593,8 @@ async function run() {
     const releaseType = determineReleaseType(commits, commitCounts);
     const nextVersion = await incrementVersion(pkg.version, releaseType);
     updatePackageJson(nextVersion);
+    console.log({ releaseType, nextVersion });
+    pushContent(nextVersion);
     await execa("git", ["tag", `v${nextVersion}`]);
     await execa("git", ["push", "--tags"]);
     // Remplacez les valeurs suivantes par vos informations GitHub
