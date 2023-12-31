@@ -1,8 +1,10 @@
 import chalk from 'chalk';
-import 'fs';
+import { readFileSync } from 'fs';
 import simpleGit from 'simple-git';
+import { getNextVersion } from 'version-next';
 
 const git = simpleGit();
+const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 async function getLastTag() {
     try {
         const tag = await git.raw(["describe", "--tags", "--abbrev=0"]);
@@ -28,11 +30,33 @@ async function getLastCommits() {
         process.exit(1);
     }
 }
+async function getCurrentBranch() {
+    try {
+        const branchSummary = await git.branch();
+        const currentBranch = branchSummary.current;
+        // console.log("currentBranch", chalk.greenBright(currentBranch));
+        return currentBranch;
+    }
+    catch (error) {
+        console.error(error);
+        process.exit(1);
+    }
+}
+async function incrementVersion(pkgVersion, releaseType) {
+    const currentBranch = await getCurrentBranch();
+    console.log({ pkgVersion });
+    const nextVersion = getNextVersion(String(pkgVersion), {
+        type: releaseType,
+        stage: currentBranch,
+    });
+    return nextVersion;
+}
 function parseCommits(commits) {
     const commitCounts = [];
     for (const commit of commits) {
+        const regex = /^(chore|fix|feat)\b/i;
         const match = commit.message.match(/^([^\s:]+)/);
-        if (match) {
+        if (match && regex.test(match[0])) {
             const type = match[0].toLowerCase();
             const existingCommit = commitCounts.find((commit) => commit.type === type);
             if (existingCommit) {
@@ -43,36 +67,27 @@ function parseCommits(commits) {
             }
         }
     }
-    console.log("Nombre de commits par type :", commitCounts);
     return commitCounts;
 }
 function determineReleaseType(commits, commitCounts) {
     const mostFrequentType = commitCounts.reduce((mostFrequent, entry) => {
-        console.log({ mostFrequent, entry });
         return entry.count > mostFrequent.count ? entry : mostFrequent;
     }, { type: "", count: 0 });
-    console.log({ mostFrequentType });
-    // Vérifier s'il y a un "BREAKING CHANGE" dans les messages de commit
-    const hasBreakingChange = commits.some((commit) => commit.message.includes("BREAKING CHANGE"));
+    const hasBreakingChange = commits.some((commit) => commit.message.includes("BREAKING CHANGE") || commit.message.includes("!"));
     const finalReleaseType = hasBreakingChange
         ? "major"
         : mostFrequentType.type === "fix" || mostFrequentType.type === "chore"
             ? "patch"
             : "minor";
-    // Ajuster le type de version en fonction de la présence d'un "BREAKING CHANGE"
-    /* const finalReleaseType = hasBreakingChange
-      ? "major"
-      : mostFrequentType.type === "feat"
-      ? "minor"
-      : "patch"; */
-    // console.log({ releaseType, hasBreakingChange, finalReleaseType });
-    // console.log("Type de version détecté :", finalReleaseType);
-    console.log({ finalReleaseType });
+    return finalReleaseType;
 }
 async function run() {
     const commits = await getLastCommits();
     const commitCounts = parseCommits(commits);
-    determineReleaseType(commits, commitCounts);
+    const releaseType = determineReleaseType(commits, commitCounts);
+    // isSemantic();
+    const nextVersion = await incrementVersion(pkg.version, releaseType);
+    console.log({ nextVersion });
     // console.log({ commitMessages, releaseType });
     /* if (releaseType !== "none") {
       const currentVersion = "1.0.0"; // Remplacez par la version actuelle de votre projet
