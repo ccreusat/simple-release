@@ -85,6 +85,12 @@ function determineReleaseType(
     commit.message.includes("BREAKING CHANGE")
   );
 
+  const objectLiteral = {
+    fix: "patch",
+    chore: "patch",
+    feat: "minor",
+  };
+
   const finalReleaseType = hasBreakingChange
     ? "major"
     : mostFrequentType.type === "fix" || mostFrequentType.type === "chore"
