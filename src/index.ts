@@ -1,78 +1,9 @@
-#!/usr/bin/env node
-import fs from "fs";
 import chalk from "chalk";
-import { cosmiconfig } from "cosmiconfig";
-import { simpleGit } from "simple-git";
-import { getNextVersion } from "version-next";
-import { execa } from "execa";
+import parser from "conventional-commits-parser";
+import { readFileSync, writeFileSync } from "fs";
+import simpleGit, { DefaultLogFields, ListLogLine } from "simple-git";
 
-const moduleName = "phnx";
-const explorer = cosmiconfig(moduleName);
 const git = simpleGit();
-
-const pkg = JSON.parse(
-  fs.readFileSync(new URL("../package.json", import.meta.url), "utf8")
-);
-
-console.log(chalk.bgMagentaBright(pkg.version));
-
-async function getConfig() {
-  try {
-    const result = await explorer.search();
-    if (!result || !result.config) {
-      throw new Error("No config file found");
-    }
-    const config = result.config;
-    console.log(chalk.yellowBright(JSON.stringify(config)));
-    return config;
-  } catch (error) {
-    console.error(chalk.redBright.bold(`${error.message}`));
-    process.exit(1);
-  }
-}
-
-async function getStatus() {
-  try {
-    const status = await git.status();
-    const isClean = status.files.length === 0;
-
-    if (!isClean) throw new Error();
-
-    console.log(chalk.greenBright(isClean));
-
-    return isClean;
-  } catch (error) {
-    console.error(chalk.redBright("Working tree is not clean"));
-    process.exit(1);
-  }
-}
-
-async function isInitialized() {
-  try {
-    const isInitialized = await git.checkIsRepo();
-
-    if (!isInitialized) throw new Error();
-
-    console.log(chalk.bgGreenBright("Le repo est déjà initialisé."));
-    return isInitialized;
-  } catch (error) {
-    console.log(chalk.redBright("Le repo n'est pas initialisé."));
-    process.exit(1);
-  }
-}
-
-async function getCurrentBranch() {
-  try {
-    const branchSummary = await git.branch();
-    const currentBranch = branchSummary.current;
-    console.log("currentBranch", chalk.greenBright(currentBranch));
-
-    return branchSummary.current;
-  } catch (error) {
-    console.error(error);
-    process.exit(1);
-  }
-}
 
 async function getLastTag() {
   try {
@@ -101,114 +32,78 @@ async function getLastCommits() {
   }
 }
 
-function isSameVersion(pkgVersion: string, tagVersion: string) {
-  const isSameVersion =
-    pkgVersion === tagVersion ? chalk.blueBright(true) : chalk.red(false);
-
-  console.log("isSameVersion", isSameVersion);
+function getCommitMessages() {
+  // Lire les commits depuis le fichier ou autre source
+  return readFileSync("path/to/your/commitlog.txt", "utf-8");
 }
 
-async function versionPrerelease(prerelease: string[], currentBranch: string) {
-  const preid = prerelease.find(
-    (prereleaseBranch: string) => prereleaseBranch === currentBranch
-  );
-
-  if (!preid) return;
-
-  console.log({ preid, currentBranch });
-
-  const { stdout } = await execa("npm", [
-    "version",
-    "prerelease",
-    "--preid",
-    preid,
-  ]);
-
-  console.log(chalk.green(stdout));
+function parseCommits(
+  commitMessages: readonly (DefaultLogFields & ListLogLine)[]
+) {
+  // Parser les commits
+  const commits: any[] = [];
+  parser({ commit: { delimiters: ["\n"] } })
+    .on("data", (parsedCommit: any) => {
+      commits.push(parsedCommit);
+    })
+    .end(commitMessages);
+  return commits;
 }
 
-async function shouldBeReleaseorPrerelease() {
-  try {
-    const currentBranch = await getCurrentBranch();
-    const config = await getConfig();
-
-    let result;
-
-    if (config.release.includes(currentBranch)) {
-      result = "release";
+function determineReleaseType(
+  commits: readonly (DefaultLogFields & ListLogLine)[]
+) {
+  for (const commit of commits) {
+    if (commit.message.startsWith === "feat") {
+      return "minor";
+    } else if (commit.message.startsWith === "fix") {
+      return "patch";
     }
+    // Ajouter d'autres conditions si nécessaire pour d'autres types de changements
+  }
+  return "patch"; // Version de correctif par défaut si aucun type spécifique n'est détecté
+}
 
-    if (config.prerelease.includes(currentBranch)) {
-      result = "prerelease";
-    }
-
-    console.log(chalk.bgBlueBright(result));
-    return result;
-  } catch (error) {
-    console.log(chalk.red(error));
-    process.exit(1);
+function incrementVersion(currentVersion: string, releaseType: string): string {
+  // Logique pour incrémenter la version
+  const [major, minor, patch] = currentVersion.split(".").map(Number);
+  if (releaseType === "major") {
+    return `${major + 1}.0.0`;
+  } else if (releaseType === "minor") {
+    return `${major}.${minor + 1}.0`;
+  } else {
+    return `${major}.${minor}.${patch + 1}`;
   }
 }
 
-// Using try-catch for better error handling
-try {
-  await isInitialized();
-
-  const config = await getConfig();
-  const currentBranch = await getCurrentBranch();
-
-  const lastTag = await getLastTag();
-  const tagVersion = lastTag.split("v")[1];
-
-  fs.readFile(`${process.cwd()}/.phnxrc`, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log({ data });
-
-    const parsedData = JSON.parse(data);
-    const content = (JSON.parse(data).lastRelease = lastTag);
-
-    console.log(parsedData);
-
-    /* fs.writeFile(`${process.cwd()}/.phnxrc`, content, (err) => {
-      if (err) {
-        console.error(err);
-      }
-      // file written successfully
-    }); */
-  });
-
-  isSameVersion(pkg.version, tagVersion);
-
-  const nextVersion = getNextVersion(pkg.version, {
-    type: "patch",
-    stage: "alpha",
-  });
-
-  console.log("nextVersion", chalk.greenBright(nextVersion));
-
-  const allCommits = await getLastCommits();
-  console.log(
-    "🚀 ~ file: index.ts:94 ~ allCommits:",
-    chalk.greenBright(allCommits.length)
-  );
-
-  // await getStatus();
-  // await versionPrerelease(config.prerelease, currentBranch);
-  // Lister les fichiers du working tree
-  const statusSummary = await git.status();
-
-  const filesToAdd = statusSummary.files.map((file) => file.path);
-
-  console.log({ filesToAdd });
-
-  await git.add(filesToAdd);
-  await git.commit(`chore: test version: ${nextVersion}`);
-  await git.push("origin", currentBranch);
-  // Continue with the rest of your logic here...
-} catch (error) {
-  console.error(chalk.redBright("An error occurred:"), error);
-  process.exit(1);
+function updatePackageJson(version: string): void {
+  // Mettre à jour le fichier package.json avec la nouvelle version
+  const packageJsonPath = "path/to/your/package.json";
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+  packageJson.version = version;
+  writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2), "utf-8");
 }
+
+async function run() {
+  // const commitMessages = getCommitMessages();
+  const commitMessages = await getLastCommits();
+
+  // console.log({ commitMessages });
+  //const commits = parseCommits(commitMessages);
+  const releaseType = determineReleaseType(commitMessages);
+
+  console.log({ commitMessages, releaseType });
+
+  /* if (releaseType !== "none") {
+    const currentVersion = "1.0.0"; // Remplacez par la version actuelle de votre projet
+    const newVersion = incrementVersion(currentVersion, releaseType);
+    console.log(`Incrémenter la version de ${currentVersion} à ${newVersion}`);
+    updatePackageJson(newVersion);
+  } else {
+    console.log(
+      "Aucun changement majeur ou correctif détecté. Aucune incrémentation de version nécessaire."
+    );
+  } */
+}
+
+run();
