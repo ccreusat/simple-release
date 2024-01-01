@@ -18535,7 +18535,7 @@ async function createReleaseNote(owner, repo, tag, token, releaseNote) {
             body: releaseNote,
         }, {
             headers: {
-                Authorization: `${token}`,
+                Authorization: `Bearer ${token}`,
                 Accept: "application/vnd.github.v3+json",
             },
         });
