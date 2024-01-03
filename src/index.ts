@@ -1,9 +1,8 @@
 import simpleGit, { SimpleGit } from "simple-git";
 import { execa } from "execa";
 import { cosmiconfigSync } from "cosmiconfig";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { PRERELEASE_BRANCH, RELEASE_BRANCH } from "./constants/default-branch";
-import chalk from "chalk";
 import { Octokit } from "@octokit/rest";
 
 interface ReleaseBranches {
@@ -198,10 +197,24 @@ async function determineVersion(): Promise<string> {
 
 async function updatePackageVersion() {
   try {
+    const lastTag = await getLastTag();
     const releaseType = await determineReleaseType();
     const currentBranch = await getCurrentBranch();
 
-    console.log({ releaseType });
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+    );
+
+    pkg.version = lastTag.split("v")[1];
+
+    writeFileSync(
+      new URL("../package.json", import.meta.url),
+      JSON.stringify(pkg, null, 2)
+    );
+
+    const pkgVersion = pkg.version;
+
+    console.log({ releaseType, currentBranch, pkgVersion });
 
     if (releaseType === ReleaseType.Prerelease) {
       await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
@@ -222,7 +235,9 @@ async function updatePackageVersion() {
 
 async function publishToNpm() {
   try {
-    await execa("npm", ["publish"]);
+    const currentBranch = await getCurrentBranch();
+
+    await execa("npm", ["publish", "--tag", currentBranch]);
     console.log("Package publié sur npm");
   } catch (error) {
     console.error("Erreur lors de la publication sur npm:", error);
