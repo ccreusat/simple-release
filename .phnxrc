@@ -1,11 +1,33 @@
 {
-    "release": [
+    "git": {
+        "add": false,
+        "commit": {
+            "enable": false,
+            "message": "chore: release"
+        },
+        "push": false
+    },
+    "github": false,
+    "npm": {
+        "versioning": true,
+        "publish": false
+    },
+    "branches": [
         "main",
-        "master"
-    ],
-    "prerelease": [
-        "alpha",
-        "beta",
-        "next"
+        {
+            "name": "alpha",
+            "prerelease": true,
+            "enableReleaseNotes": false
+        },
+        {
+            "name": "beta",
+            "prerelease": true,
+            "enableReleaseNotes": false
+        },
+        {
+            "name": "rc",
+            "prerelease": true,
+            "enableReleaseNotes": false
+        }
     ]
 }
