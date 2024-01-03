@@ -198,9 +198,6 @@ async function determineVersion(): Promise<string> {
 async function updatePackageVersion() {
   try {
     const lastTag = await getLastTag();
-    const releaseType = await determineReleaseType();
-    const currentBranch = await getCurrentBranch();
-
     const pkg = JSON.parse(
       readFileSync(new URL("../package.json", import.meta.url), "utf8")
     );
@@ -211,10 +208,15 @@ async function updatePackageVersion() {
       new URL("../package.json", import.meta.url),
       JSON.stringify(pkg, null, 2)
     );
+  }
+}
 
-    const pkgVersion = pkg.version;
+async function npmVersion() {
+  try {
+    const releaseType = await determineReleaseType();
+    const currentBranch = await getCurrentBranch();
 
-    console.log({ releaseType, currentBranch, pkgVersion });
+    await updatePackageVersion();
 
     if (releaseType === ReleaseType.Prerelease) {
       await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
@@ -309,7 +311,7 @@ async function createRelease() {
   console.log({ getVersion, lastTag });
 
   try {
-    if (config.npm.versioning) await updatePackageVersion();
+    if (config.npm.versioning) await npmVersion();
 
     if (config.npm.publish) await publishToNpm();
 

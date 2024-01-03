@@ -3487,13 +3487,18 @@ async function determineVersion() {
 async function updatePackageVersion() {
     try {
         const lastTag = await getLastTag();
-        const releaseType = await determineReleaseType();
-        const currentBranch = await getCurrentBranch();
         const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
         pkg.version = lastTag.split("v")[1];
         writeFileSync(new URL("../package.json", import.meta.url), JSON.stringify(pkg, null, 2));
-        const pkgVersion = pkg.version;
-        console.log({ releaseType, currentBranch, pkgVersion });
+    }
+    finally {
+    }
+}
+async function npmVersion() {
+    try {
+        const releaseType = await determineReleaseType();
+        const currentBranch = await getCurrentBranch();
+        await updatePackageVersion();
         if (releaseType === ReleaseType.Prerelease) {
             await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
             console.log("Version prerelease mise à jour");
@@ -3573,7 +3578,7 @@ async function createRelease() {
     console.log({ getVersion, lastTag });
     try {
         if (config.npm.versioning)
-            await updatePackageVersion();
+            await npmVersion();
         if (config.npm.publish)
             await publishToNpm();
         if (config.github)
