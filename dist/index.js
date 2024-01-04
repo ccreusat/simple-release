@@ -3348,12 +3348,10 @@ const moduleName = "phnx";
 const explorer = cosmiconfigSync(moduleName);
 const defaultConfig = {
     git: {
-        add: true,
+        handle_working_tree: true,
         commit: {
-            enable: true,
             message: "chore: release",
         },
-        push: true,
     },
     github: {
         enableReleaseNotes: true,
@@ -3496,7 +3494,7 @@ async function updatePackageVersion() {
         throw error;
     }
 }
-async function npmVersion() {
+async function npmVersion(nextVersion) {
     try {
         const releaseType = await determineReleaseType();
         const currentBranch = await getCurrentBranch();
@@ -3506,9 +3504,8 @@ async function npmVersion() {
             console.log("Version prerelease mise à jour");
         }
         else {
-            const versionType = await determineVersion();
-            await execa("npm", ["version", versionType]);
-            console.log(`Version ${versionType} mise à jour`);
+            await execa("npm", ["version", nextVersion]);
+            console.log(`Version ${nextVersion} mise à jour`);
         }
     }
     catch (error) {
@@ -3551,7 +3548,7 @@ async function createGithubRelease() {
 }
 async function createGitlabRelease() {
     try {
-        const response = await fetch(`https://gitlab.com/api/v4/projects/${config.gitlab.projectId}/releases`, {
+        const response = await fetch(`https://gitlab.com/api/v4/projects/${config?.gitlab?.projectId}/releases`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -3573,14 +3570,26 @@ async function createGitlabRelease() {
         throw error;
     }
 }
+async function pushContent(nextVersion) {
+    const currentBranch = await getCurrentBranch();
+    const statusSummary = await git.status();
+    const filesToAdd = statusSummary.files.map((file) => file.path);
+    const gitMessage = config.git.commit.message ?? `chore: release: ${nextVersion}`;
+    await git.add(filesToAdd);
+    await git.commit(gitMessage);
+    await git.push("origin", currentBranch);
+}
 // --- Fonction Principale ---
 async function createRelease() {
     const getVersion = await getCurrentPackageVersion();
     const lastTag = await getLastTag();
+    const nextVersion = await determineVersion();
     console.log({ getVersion, lastTag });
     try {
+        if (config.git.handle_working_tree)
+            await pushContent(nextVersion);
         if (config.npm.versioning)
-            await npmVersion();
+            await npmVersion(nextVersion);
         if (config.npm.publish)
             await publishToNpm();
         if (config.github)

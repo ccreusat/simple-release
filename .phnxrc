@@ -1,11 +1,9 @@
 {
     "git": {
-        "add": false,
+        "handle_working_tree": true,
         "commit": {
-            "enable": false,
             "message": "chore: release"
-        },
-        "push": false
+        }
     },
     "github": false,
     "npm": {
