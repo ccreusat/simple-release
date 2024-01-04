@@ -1,7 +1,7 @@
 import simpleGit from 'simple-git';
 import { execa } from 'execa';
 import { cosmiconfigSync } from 'cosmiconfig';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 
 const RELEASE_BRANCH = ["master", "main"];
 const PRERELEASE_BRANCH = ["alpha", "beta", "rc", "next"];
@@ -6491,6 +6491,17 @@ async function determineVersion() {
         throw error;
     }
 }
+async function updatePackageVersion(nextVersion) {
+    try {
+        const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+        pkg.version = nextVersion;
+        writeFileSync(new URL("../package.json", import.meta.url), JSON.stringify(pkg, null, 2));
+    }
+    catch (error) {
+        console.error("Erreur", error);
+        throw error;
+    }
+}
 async function getNextVersion() {
     try {
         const releaseType = await determineReleaseType();
@@ -6502,6 +6513,7 @@ async function getNextVersion() {
         else {
             nextVersion = semver$1.inc(pkg.version, "prerelease");
         }
+        await updatePackageVersion(nextVersion);
         return nextVersion;
     }
     catch (error) {
@@ -6509,6 +6521,27 @@ async function getNextVersion() {
         throw error;
     }
 }
+// async function npmVersion(nextVersion: string) {
+//   try {
+//     const releaseType = await determineReleaseType();
+//     const currentBranch = await getCurrentBranch();
+//     await updatePackageVersion();
+//     if (releaseType === ReleaseType.Prerelease) {
+//       await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
+//       // npm version prerelease --preid alpha -m "Upgrade to %s for reasons" -f
+//       console.log("Version prerelease mise à jour");
+//     } else {
+//       await execa("npm", ["version", nextVersion]);
+//       console.log(`Version ${nextVersion} mise à jour`);
+//     }
+//   } catch (error) {
+//     console.error(
+//       "Erreur lors de la mise à jour de la version du package:",
+//       error
+//     );
+//     throw error;
+//   }
+// }
 async function publishToNpm() {
     try {
         const currentBranch = await getCurrentBranch();
@@ -6523,8 +6556,8 @@ async function publishToNpm() {
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 async function createGithubRelease() {
     try {
-        const version = await determineVersion();
-        const tagName = `v${version}`;
+        const nextVersion = await getNextVersion();
+        const tagName = `v${nextVersion}`;
         const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
         await octokit.repos.createRelease({
             owner: "ccreusat",
@@ -6585,9 +6618,8 @@ async function createRelease() {
     try {
         if (config.git.handle_working_tree)
             await pushContent(nextVersion);
-        // if (config.npm.versioning) await npmVersion(nextVersion);
         if (config.npm.versioning)
-            semver$1.inc("1.5.4", "prerelease", "alpha", "1");
+            await npmVersion(nextVersion);
         if (config.npm.publish)
             await publishToNpm();
         if (config.github)

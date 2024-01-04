@@ -193,14 +193,13 @@ async function determineVersion(): Promise<string> {
   }
 }
 
-async function updatePackageVersion() {
+async function updatePackageVersion(nextVersion: string) {
   try {
-    const lastTag = await getLastTag();
     const pkg = JSON.parse(
       readFileSync(new URL("../package.json", import.meta.url), "utf8")
     );
 
-    pkg.version = lastTag.split("v")[1];
+    pkg.version = nextVersion;
 
     writeFileSync(
       new URL("../package.json", import.meta.url),
@@ -228,6 +227,8 @@ async function getNextVersion() {
       nextVersion = semver.inc(pkg.version, "prerelease");
     }
 
+    await updatePackageVersion(nextVersion);
+
     return nextVersion;
   } catch (error) {
     console.error("Erreur: ", error);
@@ -235,30 +236,30 @@ async function getNextVersion() {
   }
 }
 
-async function npmVersion(nextVersion: string) {
-  try {
-    const releaseType = await determineReleaseType();
-    const currentBranch = await getCurrentBranch();
+// async function npmVersion(nextVersion: string) {
+//   try {
+//     const releaseType = await determineReleaseType();
+//     const currentBranch = await getCurrentBranch();
 
-    await updatePackageVersion();
+//     await updatePackageVersion();
 
-    if (releaseType === ReleaseType.Prerelease) {
-      await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
+//     if (releaseType === ReleaseType.Prerelease) {
+//       await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
 
-      // npm version prerelease --preid alpha -m "Upgrade to %s for reasons" -f
-      console.log("Version prerelease mise à jour");
-    } else {
-      await execa("npm", ["version", nextVersion]);
-      console.log(`Version ${nextVersion} mise à jour`);
-    }
-  } catch (error) {
-    console.error(
-      "Erreur lors de la mise à jour de la version du package:",
-      error
-    );
-    throw error;
-  }
-}
+//       // npm version prerelease --preid alpha -m "Upgrade to %s for reasons" -f
+//       console.log("Version prerelease mise à jour");
+//     } else {
+//       await execa("npm", ["version", nextVersion]);
+//       console.log(`Version ${nextVersion} mise à jour`);
+//     }
+//   } catch (error) {
+//     console.error(
+//       "Erreur lors de la mise à jour de la version du package:",
+//       error
+//     );
+//     throw error;
+//   }
+// }
 
 async function publishToNpm() {
   try {
@@ -276,8 +277,8 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 async function createGithubRelease() {
   try {
-    const version = await determineVersion();
-    const tagName = `v${version}`;
+    const nextVersion = await getNextVersion();
+    const tagName = `v${nextVersion}`;
     const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
 
     await octokit.repos.createRelease({
@@ -354,8 +355,7 @@ async function createRelease() {
   try {
     if (config.git.handle_working_tree) await pushContent(nextVersion);
 
-    // if (config.npm.versioning) await npmVersion(nextVersion);
-    if (config.npm.versioning) semver.inc("1.5.4", "prerelease", "alpha", "1");
+    if (config.npm.versioning) await npmVersion(nextVersion);
 
     if (config.npm.publish) await publishToNpm();
 
