@@ -222,7 +222,7 @@ async function getNextVersion() {
 
     console.log({ versionNumber, prerelease });
 
-    const version = semver.inc("1.5.4", "prerelease");
+    const version = semver.inc("1.5.4-alpha.1", "prerelease", "alpha");
     return version;
   } catch (error) {
     console.error("Erreur: ", error);
