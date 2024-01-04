@@ -6609,14 +6609,22 @@ async function createGitlabRelease() {
     }
 }
 async function pushContent(nextVersion) {
-    const currentBranch = await getCurrentBranch();
-    const statusSummary = await git.status();
-    const filesToAdd = statusSummary.files.map((file) => file.path);
-    console.log({ nextVersion });
-    const gitMessage = config.git.commit?.message || `chore: release: ${nextVersion}`;
-    await git.add(filesToAdd);
-    await git.commit(gitMessage);
-    await git.push("origin", currentBranch);
+    try {
+        const currentBranch = await getCurrentBranch();
+        const statusSummary = await git.status();
+        const filesToAdd = statusSummary.files.map((file) => file.path);
+        const releaseType = await determineReleaseType();
+        console.log({ nextVersion });
+        const gitMessage = config.git.commit?.message ||
+            `chore: ${releaseType === ReleaseType.Prerelease ? "prerelease" : "release"}: ${nextVersion}`;
+        await git.add(filesToAdd);
+        await git.commit(gitMessage);
+        await git.push("origin", currentBranch);
+    }
+    catch (error) {
+        console.error("Erreur:", error);
+        throw error;
+    }
 }
 // --- Fonction Principale ---
 async function createRelease() {
