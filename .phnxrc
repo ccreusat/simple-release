@@ -2,7 +2,9 @@
     "git": {
         "handle_working_tree": true
     },
-    "github": true,
+    "github": {
+        "enableReleaseNotes": false
+    },
     "npm": {
         "versioning": true,
         "publish": false
@@ -13,7 +15,7 @@
         {
             "name": "alpha",
             "prerelease": true,
-            "enableReleaseNotes": true
+            "enableReleaseNotes": false
         },
         {
             "name": "beta",

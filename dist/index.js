@@ -6638,14 +6638,20 @@ async function createRelease() {
             await pushContent(nextVersion);
         if (config.npm.publish)
             await publishToNpm();
-        if (config.github) {
+        if (config.github?.enableReleaseNotes) {
             if (!config.releaseBranches.find((branch) => branch.name === currentBranch)
-                ?.enableReleaseNotes)
+                ?.enableReleaseNotes) {
                 return;
+            }
             await createGithubRelease("ccreusat", "simple-release", newTag);
         }
-        if (config.gitlab)
+        if (config.gitlab) {
+            if (!config.releaseBranches.find((branch) => branch.name === currentBranch)
+                ?.enableReleaseNotes) {
+                return;
+            }
             await createGitlabRelease();
+        }
     }
     catch (error) {
         console.error("Erreur globale lors de la création de la release:", error);

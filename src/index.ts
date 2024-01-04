@@ -20,11 +20,9 @@ interface ReleaseConfig {
       message?: string;
     };
   };
-  github?:
-    | boolean
-    | {
-        enableReleaseNotes: boolean;
-      };
+  github?: {
+    enableReleaseNotes: boolean;
+  };
   gitlab?:
     | boolean
     | {
@@ -381,17 +379,27 @@ async function createRelease() {
 
     if (config.npm.publish) await publishToNpm();
 
-    if (config.github) {
+    if (config.github?.enableReleaseNotes) {
       if (
         !config.releaseBranches.find((branch) => branch.name === currentBranch)
           ?.enableReleaseNotes
-      )
+      ) {
         return;
+      }
 
       await createGithubRelease("ccreusat", "simple-release", newTag);
     }
 
-    if (config.gitlab) await createGitlabRelease();
+    if (config.gitlab) {
+      if (
+        !config.releaseBranches.find((branch) => branch.name === currentBranch)
+          ?.enableReleaseNotes
+      ) {
+        return;
+      }
+
+      await createGitlabRelease();
+    }
   } catch (error) {
     console.error("Erreur globale lors de la création de la release:", error);
     throw error;
