@@ -6506,13 +6506,15 @@ async function updatePackageVersion(nextVersion) {
 async function getNextVersion() {
     try {
         const releaseType = await determineReleaseType();
+        const currentBranch = await getCurrentBranch();
+        const versionType = await determineVersion();
         const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
         let nextVersion;
         if (releaseType === ReleaseType.Prerelease) {
-            nextVersion = semver$1.inc(pkg.version, "prerelease");
+            nextVersion = semver$1.inc(pkg.version, "prerelease", currentBranch);
         }
         else {
-            nextVersion = semver$1.inc(pkg.version, "prerelease");
+            nextVersion = semver$1.inc(pkg.version, versionType);
         }
         await updatePackageVersion(nextVersion);
         return nextVersion;

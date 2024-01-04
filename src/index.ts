@@ -215,6 +215,8 @@ async function updatePackageVersion(nextVersion: string) {
 async function getNextVersion() {
   try {
     const releaseType = await determineReleaseType();
+    const currentBranch = await getCurrentBranch();
+    const versionType = await determineVersion();
 
     const pkg = JSON.parse(
       readFileSync(new URL("../package.json", import.meta.url), "utf8")
@@ -223,9 +225,9 @@ async function getNextVersion() {
     let nextVersion;
 
     if (releaseType === ReleaseType.Prerelease) {
-      nextVersion = semver.inc(pkg.version, "prerelease");
+      nextVersion = semver.inc(pkg.version, "prerelease", currentBranch);
     } else {
-      nextVersion = semver.inc(pkg.version, "prerelease");
+      nextVersion = semver.inc(pkg.version, versionType);
     }
 
     await updatePackageVersion(nextVersion);
