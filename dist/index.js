@@ -6611,15 +6611,13 @@ async function pushContent(nextVersion) {
 }
 // --- Fonction Principale ---
 async function createRelease() {
-    const getVersion = await getCurrentPackageVersion();
+    const currentVersion = await getCurrentPackageVersion();
     const lastTag = await getLastTag();
     const nextVersion = await getNextVersion();
-    console.log({ getVersion, lastTag });
+    console.log({ currentVersion, lastTag, nextVersion });
     try {
         if (config.git.handle_working_tree)
             await pushContent(nextVersion);
-        if (config.npm.versioning)
-            await npmVersion(nextVersion);
         if (config.npm.publish)
             await publishToNpm();
         if (config.github)
