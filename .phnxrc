@@ -12,6 +12,11 @@
     "baseBranch": "main",
     "releaseBranches": [
         {
+            "name": "dev",
+            "prerelease": false,
+            "enableReleaseNotes": true
+        },
+        {
             "name": "alpha",
             "prerelease": true,
             "enableReleaseNotes": true

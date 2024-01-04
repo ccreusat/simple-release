@@ -107,6 +107,14 @@ async function determineReleaseType(): Promise<ReleaseType> {
       return ReleaseType.Release;
     } else if (PRERELEASE_BRANCH.includes(currentBranch)) {
       return ReleaseType.Prerelease;
+    } else if (
+      config.releaseBranches.find((branch) => branch.name === currentBranch)
+    ) {
+      return config.releaseBranches.find(
+        (branch) => branch.name === currentBranch
+      )?.prerelease
+        ? ReleaseType.Prerelease
+        : ReleaseType.Release;
     }
     throw new Error(
       `La branche ${currentBranch} n'est pas configurée pour une release ou une prerelease.`
