@@ -308,7 +308,7 @@ async function pushContent(nextVersion: string) {
   const filesToAdd = statusSummary.files.map((file) => file.path);
 
   const gitMessage =
-    config.git.commit.message ?? `chore: release: ${nextVersion}`;
+    config.git.commit.message || `chore: release: ${nextVersion}`;
 
   await git.add(filesToAdd);
   await git.commit(gitMessage);
