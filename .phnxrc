@@ -11,7 +11,6 @@
     },
     "baseBranch": "main",
     "releaseBranches": [
-        "main",
         {
             "name": "alpha",
             "prerelease": true,
@@ -20,7 +19,7 @@
         {
             "name": "beta",
             "prerelease": true,
-            "enableReleaseNotes": false
+            "enableReleaseNotes": true
         },
         {
             "name": "rc",
