@@ -350,8 +350,6 @@ async function pushContent(nextVersion: string) {
     const filesToAdd = statusSummary.files.map((file) => file.path);
     const releaseType = await determineReleaseType();
 
-    console.log({ nextVersion });
-
     const gitMessage =
       config.git.commit?.message ||
       `chore: ${

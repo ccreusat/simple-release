@@ -6614,7 +6614,6 @@ async function pushContent(nextVersion) {
         const statusSummary = await git.status();
         const filesToAdd = statusSummary.files.map((file) => file.path);
         const releaseType = await determineReleaseType();
-        console.log({ nextVersion });
         const gitMessage = config.git.commit?.message ||
             `chore: ${releaseType === ReleaseType.Prerelease ? "prerelease" : "release"}: ${nextVersion}`;
         await git.add(filesToAdd);
