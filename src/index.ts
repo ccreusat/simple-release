@@ -212,6 +212,22 @@ async function updatePackageVersion() {
   }
 }
 
+async function getNextVersion() {
+  try {
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+    );
+
+    console.log(pkg.version.split("-"));
+
+    const version = semver.inc("1.5.4", "prerelease", "alpha", "1");
+    return version;
+  } catch (error) {
+    console.error("Erreur: ", error);
+    throw error;
+  }
+}
+
 async function npmVersion(nextVersion: string) {
   try {
     const releaseType = await determineReleaseType();
@@ -324,7 +340,7 @@ async function pushContent(nextVersion: string) {
 async function createRelease() {
   const getVersion = await getCurrentPackageVersion();
   const lastTag = await getLastTag();
-  const nextVersion = await determineVersion();
+  const nextVersion = await getNextVersion();
 
   console.log({ getVersion, lastTag });
 
