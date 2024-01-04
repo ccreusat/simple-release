@@ -1,10 +1,10 @@
-import simpleGit, { SimpleGit } from "simple-git";
-import { execa } from "execa";
 import { cosmiconfigSync } from "cosmiconfig";
-import { readFileSync, writeFileSync } from "fs";
-import { PRERELEASE_BRANCH, RELEASE_BRANCH } from "./constants/default-branch";
+import { execa } from "execa";
 import { Octokit } from "@octokit/rest";
+import { PRERELEASE_BRANCH, RELEASE_BRANCH } from "./constants/default-branch";
+import { readFileSync, writeFileSync } from "fs";
 import semver from "semver";
+import simpleGit, { SimpleGit } from "simple-git";
 
 interface ReleaseBranches {
   name: string;
@@ -15,6 +15,7 @@ interface ReleaseBranches {
 interface ReleaseConfig {
   git: {
     handle_working_tree: boolean;
+    customPrefix?: string;
     commit?: {
       message?: string;
     };
@@ -43,6 +44,7 @@ const explorer = cosmiconfigSync(moduleName);
 const defaultConfig: ReleaseConfig = {
   git: {
     handle_working_tree: true,
+    customPrefix: "v",
     /* commit: {
       message: "chore: release",
     }, */
@@ -359,7 +361,7 @@ async function createRelease() {
   const currentVersion = await getCurrentPackageVersion();
   const lastTag = await getLastTag();
   const nextVersion = await getNextVersion();
-  const newTag = await createTag("v", nextVersion);
+  const newTag = await createTag(config.git.customPrefix, nextVersion);
 
   console.log({ currentVersion, lastTag, newTag, nextVersion });
 

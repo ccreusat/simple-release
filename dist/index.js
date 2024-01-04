@@ -1,10 +1,7 @@
-import simpleGit from 'simple-git';
-import { execa } from 'execa';
 import { cosmiconfigSync } from 'cosmiconfig';
+import { execa } from 'execa';
 import { readFileSync, writeFileSync } from 'fs';
-
-const RELEASE_BRANCH = ["master", "main"];
-const PRERELEASE_BRANCH = ["alpha", "beta", "rc", "next"];
+import simpleGit from 'simple-git';
 
 function getUserAgent() {
     if (typeof navigator === "object" && "userAgent" in navigator) {
@@ -3344,6 +3341,9 @@ var Octokit = Octokit$1.plugin(
   userAgent: `octokit-rest.js/${VERSION}`
 });
 
+const RELEASE_BRANCH = ["master", "main"];
+const PRERELEASE_BRANCH = ["alpha", "beta", "rc", "next"];
+
 var re$2 = {exports: {}};
 
 // Note: this is the semver.org version of the spec that it implements
@@ -6358,6 +6358,7 @@ const explorer = cosmiconfigSync(moduleName);
 const defaultConfig = {
     git: {
         handle_working_tree: true,
+        customPrefix: "v",
         /* commit: {
           message: "chore: release",
         }, */
@@ -6624,7 +6625,7 @@ async function createRelease() {
     const currentVersion = await getCurrentPackageVersion();
     const lastTag = await getLastTag();
     const nextVersion = await getNextVersion();
-    const newTag = await createTag("v", nextVersion);
+    const newTag = await createTag(config.git.customPrefix, nextVersion);
     console.log({ currentVersion, lastTag, newTag, nextVersion });
     try {
         if (config.git.handle_working_tree)

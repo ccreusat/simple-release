@@ -1,6 +1,7 @@
 {
     "git": {
-        "handle_working_tree": true
+        "handle_working_tree": true,
+        "customPrefix": "phnx"
     },
     "github": false,
     "npm": {
