@@ -15,7 +15,7 @@
         {
             "name": "alpha",
             "prerelease": true,
-            "enableReleaseNotes": false
+            "enableReleaseNotes": true
         },
         {
             "name": "beta",
