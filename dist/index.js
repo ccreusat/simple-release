@@ -6358,9 +6358,9 @@ const explorer = cosmiconfigSync(moduleName);
 const defaultConfig = {
     git: {
         handle_working_tree: true,
-        commit: {
-            message: "chore: release",
-        },
+        /* commit: {
+          message: "chore: release",
+        }, */
     },
     github: {
         enableReleaseNotes: true,
@@ -6553,6 +6553,15 @@ async function publishToNpm() {
         throw error;
     }
 }
+async function createTag(nextVersion) {
+    try {
+        await git.addTag(nextVersion);
+    }
+    catch (error) {
+        console.error("Erreur lors de la publication sur npm:", error);
+        throw error;
+    }
+}
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 async function createGithubRelease() {
     try {
@@ -6604,7 +6613,7 @@ async function pushContent(nextVersion) {
     const statusSummary = await git.status();
     const filesToAdd = statusSummary.files.map((file) => file.path);
     console.log({ nextVersion });
-    const gitMessage = config.git.commit.message || `chore: release: ${nextVersion}`;
+    const gitMessage = config.git.commit?.message || `chore: release: ${nextVersion}`;
     await git.add(filesToAdd);
     await git.commit(gitMessage);
     await git.push("origin", currentBranch);
@@ -6616,6 +6625,7 @@ async function createRelease() {
     const nextVersion = await getNextVersion();
     console.log({ currentVersion, lastTag, nextVersion });
     try {
+        await createTag(nextVersion);
         if (config.git.handle_working_tree)
             await pushContent(nextVersion);
         if (config.npm.publish)

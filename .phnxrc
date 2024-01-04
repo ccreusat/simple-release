@@ -1,9 +1,6 @@
 {
     "git": {
-        "handle_working_tree": true,
-        "commit": {
-            "message": "chore: release"
-        }
+        "handle_working_tree": true
     },
     "github": false,
     "npm": {
