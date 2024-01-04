@@ -6553,15 +6553,6 @@ async function publishToNpm() {
         throw error;
     }
 }
-async function createTag(nextVersion) {
-    try {
-        await git.addTag(nextVersion);
-    }
-    catch (error) {
-        console.error("Erreur lors de la publication sur npm:", error);
-        throw error;
-    }
-}
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 async function createGithubRelease() {
     try {
@@ -6625,7 +6616,9 @@ async function createRelease() {
     const nextVersion = await getNextVersion();
     console.log({ currentVersion, lastTag, nextVersion });
     try {
-        await createTag(nextVersion);
+        // await createTag(nextVersion);
+        const result = await git.addTag(nextVersion);
+        console.log({ result });
         if (config.git.handle_working_tree)
             await pushContent(nextVersion);
         if (config.npm.publish)

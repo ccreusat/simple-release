@@ -275,7 +275,7 @@ async function publishToNpm() {
 
 async function createTag(nextVersion: string) {
   try {
-    await git.addTag(nextVersion);
+    await execa("git", []);
   } catch (error) {
     console.error("Erreur lors de la publication sur npm:", error);
     throw error;
@@ -362,7 +362,10 @@ async function createRelease() {
   console.log({ currentVersion, lastTag, nextVersion });
 
   try {
-    await createTag(nextVersion);
+    // await createTag(nextVersion);
+
+    const result = await git.addTag(nextVersion);
+    console.log({ result });
 
     if (config.git.handle_working_tree) await pushContent(nextVersion);
 
