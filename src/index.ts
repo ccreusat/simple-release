@@ -35,7 +35,8 @@ interface ReleaseConfig {
     versioning: boolean;
     publish: boolean;
   };
-  branches: [string, ...ReleaseBranches[]];
+  baseBranch: string;
+  releaseBranches: ReleaseBranches[];
 }
 
 const moduleName = "phnx";
@@ -56,8 +57,8 @@ const defaultConfig: ReleaseConfig = {
     versioning: true,
     publish: true,
   },
-  branches: [
-    "main",
+  baseBranch: "main",
+  releaseBranches: [
     {
       name: "alpha",
       prerelease: true,
@@ -367,6 +368,7 @@ async function pushContent(nextVersion: string) {
 
 // --- Fonction Principale ---
 async function createRelease() {
+  const currentBranch = await getCurrentBranch();
   const currentVersion = await getCurrentPackageVersion();
   const lastTag = await getLastTag();
   const nextVersion = await getNextVersion();
@@ -379,8 +381,15 @@ async function createRelease() {
 
     if (config.npm.publish) await publishToNpm();
 
-    if (config.github)
-      createGithubRelease("ccreusat", "simple-release", newTag);
+    if (config.github) {
+      if (
+        !config.releaseBranches.find((branch) => branch.name === currentBranch)
+          ?.enableReleaseNotes
+      )
+        return;
+
+      await createGithubRelease("ccreusat", "simple-release", newTag);
+    }
 
     if (config.gitlab) await createGitlabRelease();
   } catch (error) {
