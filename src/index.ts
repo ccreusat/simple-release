@@ -4,6 +4,7 @@ import { cosmiconfigSync } from "cosmiconfig";
 import { readFileSync, writeFileSync } from "fs";
 import { PRERELEASE_BRANCH, RELEASE_BRANCH } from "./constants/default-branch";
 import { Octokit } from "@octokit/rest";
+import semver from "semver";
 
 interface ReleaseBranches {
   name: string;
@@ -220,6 +221,8 @@ async function npmVersion(nextVersion: string) {
 
     if (releaseType === ReleaseType.Prerelease) {
       await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
+
+      // npm version prerelease --preid alpha -m "Upgrade to %s for reasons" -f
       console.log("Version prerelease mise à jour");
     } else {
       await execa("npm", ["version", nextVersion]);
@@ -328,7 +331,8 @@ async function createRelease() {
   try {
     if (config.git.handle_working_tree) await pushContent(nextVersion);
 
-    if (config.npm.versioning) await npmVersion(nextVersion);
+    // if (config.npm.versioning) await npmVersion(nextVersion);
+    if (config.npm.versioning) semver.inc("1.5.4", "prerelease", "alpha", "1");
 
     if (config.npm.publish) await publishToNpm();
 
