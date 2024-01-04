@@ -247,36 +247,16 @@ async function getNextVersion() {
   }
 }
 
-// async function npmVersion(nextVersion: string) {
-//   try {
-//     const releaseType = await determineReleaseType();
-//     const currentBranch = await getCurrentBranch();
-
-//     await updatePackageVersion();
-
-//     if (releaseType === ReleaseType.Prerelease) {
-//       await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
-
-//       // npm version prerelease --preid alpha -m "Upgrade to %s for reasons" -f
-//       console.log("Version prerelease mise à jour");
-//     } else {
-//       await execa("npm", ["version", nextVersion]);
-//       console.log(`Version ${nextVersion} mise à jour`);
-//     }
-//   } catch (error) {
-//     console.error(
-//       "Erreur lors de la mise à jour de la version du package:",
-//       error
-//     );
-//     throw error;
-//   }
-// }
-
 async function publishToNpm() {
   try {
     const currentBranch = await getCurrentBranch();
+    const releaseType = await determineReleaseType();
 
-    await execa("npm", ["publish", "--tag", currentBranch]);
+    if (releaseType === ReleaseType.Prerelease) {
+      await execa("npm", ["publish", "--tag", currentBranch]);
+    } else {
+      await execa("npm", ["publish"]);
+    }
     console.log("Package publié sur npm");
   } catch (error) {
     console.error("Erreur lors de la publication sur npm:", error);
