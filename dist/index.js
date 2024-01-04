@@ -3491,7 +3491,9 @@ async function updatePackageVersion() {
         pkg.version = lastTag.split("v")[1];
         writeFileSync(new URL("../package.json", import.meta.url), JSON.stringify(pkg, null, 2));
     }
-    finally {
+    catch (error) {
+        console.error("Erreur", error);
+        throw error;
     }
 }
 async function npmVersion() {

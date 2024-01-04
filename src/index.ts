@@ -208,6 +208,9 @@ async function updatePackageVersion() {
       new URL("../package.json", import.meta.url),
       JSON.stringify(pkg, null, 2)
     );
+  } catch (error) {
+    console.error("Erreur", error);
+    throw error;
   }
 }
 
