@@ -1,11 +1,30 @@
 {
-    "release": [
-        "main",
-        "master"
-    ],
-    "prerelease": [
-        "alpha",
-        "beta",
-        "next"
+    "git": {
+        "handle_working_tree": true
+    },
+    "github": {
+        "enableReleaseNotes": true
+    },
+    "npm": {
+        "versioning": true,
+        "publish": false
+    },
+    "baseBranch": "main",
+    "releaseBranches": [
+        {
+            "name": "alpha",
+            "prerelease": true,
+            "enableReleaseNotes": true
+        },
+        {
+            "name": "beta",
+            "prerelease": true,
+            "enableReleaseNotes": true
+        },
+        {
+            "name": "rc",
+            "prerelease": true,
+            "enableReleaseNotes": false
+        }
     ]
 }

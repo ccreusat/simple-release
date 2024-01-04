@@ -18,6 +18,7 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
+    "@octokit/rest": "^20.0.2",
     "@rollup/plugin-commonjs": "25.0.7",
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.2.3",
@@ -28,6 +29,7 @@
     "conventional-commits-parser": "^5.0.0",
     "cosmiconfig": "9.0.0",
     "execa": "8.0.1",
+    "semver": "^7.5.4",
     "simple-git": "3.21.0",
     "tslib": "2.6.2",
     "version-next": "1.0.2"

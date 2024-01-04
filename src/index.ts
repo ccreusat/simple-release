@@ -1,29 +1,135 @@
-import chalk from "chalk";
+import { cosmiconfigSync } from "cosmiconfig";
 import { execa } from "execa";
+import { Octokit } from "@octokit/rest";
+import { PRERELEASE_BRANCH, RELEASE_BRANCH } from "./constants/default-branch";
 import { readFileSync, writeFileSync } from "fs";
-import simpleGit, { DefaultLogFields, ListLogLine } from "simple-git";
-import { getNextVersion } from "version-next";
-import { PRERELEASE_BRANCH } from "./constants/default-branch";
-import axios from "axios";
+import semver from "semver";
+import simpleGit, { SimpleGit } from "simple-git";
 
-const git = simpleGit();
+interface ReleaseBranches {
+  name: string;
+  prerelease: boolean;
+  enableReleaseNotes: boolean;
+}
 
-const pkg = JSON.parse(
-  readFileSync(new URL("../package.json", import.meta.url), "utf8")
-);
+interface ReleaseConfig {
+  git: {
+    handle_working_tree: boolean;
+    customPrefix?: string;
+    commit?: {
+      message?: string;
+    };
+  };
+  github?: {
+    enableReleaseNotes: boolean;
+  };
+  gitlab?:
+    | boolean
+    | {
+        token: string;
+        projectId: string;
+      };
+  npm: {
+    versioning: boolean;
+    publish: boolean;
+  };
+  baseBranch: string;
+  releaseBranches: ReleaseBranches[];
+}
 
-async function getLastTag() {
+const moduleName = "phnx";
+const explorer = cosmiconfigSync(moduleName);
+
+const defaultConfig: ReleaseConfig = {
+  git: {
+    handle_working_tree: true,
+    customPrefix: "v",
+    /* commit: {
+      message: "chore: release",
+    }, */
+  },
+  github: {
+    enableReleaseNotes: true,
+  },
+  npm: {
+    versioning: true,
+    publish: true,
+  },
+  baseBranch: "main",
+  releaseBranches: [
+    {
+      name: "alpha",
+      prerelease: true,
+      enableReleaseNotes: false,
+    },
+    {
+      name: "beta",
+      prerelease: true,
+      enableReleaseNotes: false,
+    },
+    {
+      name: "rc",
+      prerelease: true,
+      enableReleaseNotes: false,
+    },
+  ],
+};
+
+const userConfig = explorer.search();
+const config: ReleaseConfig = { ...defaultConfig, ...userConfig?.config };
+
+const git: SimpleGit = simpleGit();
+
+enum ReleaseType {
+  Release = "release",
+  Prerelease = "prerelease",
+}
+
+async function getCurrentBranch(): Promise<string> {
   try {
-    const tag = await git.tags();
-    const lastTag = tag.latest;
+    const branchSummary = await git.branch();
+    const currentBranch = branchSummary.current;
 
-    if (!lastTag) throw new Error();
-
-    console.log("lastTag", chalk.greenBright(lastTag));
-    return lastTag;
+    return currentBranch;
   } catch (error) {
-    console.error(chalk.redBright("No tag found", error));
-    process.exit(1);
+    console.error(
+      "Erreur lors de la récupération de la branche actuelle:",
+      error
+    );
+    throw error;
+  }
+}
+
+async function determineReleaseType(): Promise<ReleaseType> {
+  try {
+    const currentBranch = await getCurrentBranch();
+    if (RELEASE_BRANCH.includes(currentBranch)) {
+      return ReleaseType.Release;
+    } else if (PRERELEASE_BRANCH.includes(currentBranch)) {
+      return ReleaseType.Prerelease;
+    }
+    throw new Error(
+      `La branche ${currentBranch} n'est pas configurée pour une release ou une prerelease.`
+    );
+  } catch (error) {
+    console.error("Erreur lors de la détermination du type de release:", error);
+    throw error;
+  }
+}
+
+function getCurrentPackageVersion(): string {
+  try {
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+    );
+    const packageVersion = pkg.version;
+    return packageVersion;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la lecture de la version actuelle du package:",
+      error
+    );
+    throw error;
   }
 }
 
@@ -39,215 +145,270 @@ async function getLastCommits() {
   }
 }
 
-interface CommitCounts {
-  type: string;
-  count: number;
-}
-
-async function getCurrentBranch() {
+async function getLastTag(): Promise<string> {
   try {
-    const branchSummary = await git.branch();
-    const currentBranch = branchSummary.current;
-    // console.log("currentBranch", chalk.greenBright(currentBranch));
+    const tag = await git.tags();
+    const lastTag = tag.latest;
 
-    return currentBranch;
+    if (!lastTag) throw new Error();
+
+    return lastTag;
   } catch (error) {
-    console.error(error);
-    process.exit(1);
+    console.error("Erreur lors de la récupération du dernier tag:", error);
+    throw error;
   }
 }
 
-async function incrementVersion(pkgVersion: number, releaseType: string) {
-  const currentBranch = await getCurrentBranch();
-
-  const nextVersion = getNextVersion(String(pkgVersion), {
-    type: releaseType,
-    stage: PRERELEASE_BRANCH.includes(currentBranch) ? currentBranch : "",
-  });
-
-  console.log({ nextVersion });
-
-  return nextVersion;
-}
-
-function parsedCommits(commits: readonly (DefaultLogFields & ListLogLine)[]) {
-  const commitCounts: CommitCounts[] = [];
-
-  for (const commit of commits) {
-    const regex = /^(chore|fix|feat)\b/i;
-    const match = commit.message.match(/^([^\s:]+)/);
-
-    if (match && regex.test(match[0])) {
-      const type = match[0].toLowerCase();
-      const existingCommit = commitCounts.find(
-        (commit) => commit.type === type
-      );
-
-      if (existingCommit) {
-        existingCommit.count++;
-      } else {
-        commitCounts.push({ type, count: 1 });
-      }
-    }
-  }
-
-  return commitCounts;
-}
-
-function determineReleaseType(
-  commits: readonly (DefaultLogFields & ListLogLine)[],
-  commitCounts: CommitCounts[]
-) {
-  const mostFrequentType = commitCounts.reduce(
-    (mostFrequent, entry) => {
-      return entry.count > mostFrequent.count ? entry : mostFrequent;
-    },
-    { type: "", count: 0 }
-  );
-
-  const hasBreakingChange = commits.some(
-    (commit) =>
-      commit.message.includes("BREAKING CHANGE") || commit.message.includes("!")
-  );
-
-  const finalReleaseType = hasBreakingChange
-    ? "major"
-    : mostFrequentType.type === "feat"
-    ? "minor"
-    : "patch";
-
-  return finalReleaseType;
-}
-
-function updatePackageJson(version: string): void {
-  const path = `${process.cwd()}/package.json`;
-  const packageJson = JSON.parse(readFileSync(path, "utf-8"));
-
-  packageJson.version = version;
-
-  writeFileSync(path, JSON.stringify(packageJson, null, 2), "utf-8");
-}
-
-async function pushContent(nextVersion: string) {
-  const currentBranch = await getCurrentBranch();
-  const statusSummary = await git.status();
-  const filesToAdd = statusSummary.files.map((file) => file.path);
-
-  await git.add(filesToAdd);
-  await git.commit(`chore: release: ${nextVersion}`);
-  await git.push("origin", currentBranch);
-}
-
-async function createReleaseNote(owner, repo, tag, token, releaseNote) {
-  console.log({ owner, repo, tag, token, releaseNote });
-  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
-
+async function determineVersion(): Promise<string> {
   try {
-    // Créer une nouvelle release en utilisant l'API GitHub
-    const response = await axios.post(
-      apiUrl,
+    const commits = await getLastCommits();
+
+    let fixCount = 0;
+    let featCount = 0;
+    let breakingChangeCount = 0;
+
+    commits.forEach((commit) => {
+      if (commit.message.startsWith("feat:")) {
+        featCount++;
+      } else if (commit.message.startsWith("fix:")) {
+        fixCount++;
+      }
+      if (
+        commit.message.includes("BREAKING CHANGE:") ||
+        commit.message.startsWith("BREAKING CHANGE:")
+      ) {
+        breakingChangeCount++;
+      }
+    });
+
+    if (breakingChangeCount > 0) {
+      return "major";
+    } else if (featCount >= fixCount) {
+      return "minor";
+    } else {
+      return "patch";
+    }
+  } catch (error) {
+    console.error("Erreur lors de la détermination de la version:", error);
+    throw error;
+  }
+}
+
+async function updatePackageVersion(nextVersion: string) {
+  try {
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+    );
+
+    pkg.version = nextVersion;
+
+    writeFileSync(
+      new URL("../package.json", import.meta.url),
+      JSON.stringify(pkg, null, 2)
+    );
+  } catch (error) {
+    console.error("Erreur", error);
+    throw error;
+  }
+}
+
+async function getNextVersion() {
+  try {
+    const releaseType = await determineReleaseType();
+    const currentBranch = await getCurrentBranch();
+    const versionType = await determineVersion();
+
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+    );
+
+    let nextVersion;
+
+    if (releaseType === ReleaseType.Prerelease) {
+      nextVersion = semver.inc(pkg.version, "prerelease", currentBranch);
+    } else {
+      nextVersion = semver.inc(pkg.version, versionType);
+    }
+
+    await updatePackageVersion(nextVersion);
+
+    return nextVersion;
+  } catch (error) {
+    console.error("Erreur: ", error);
+    throw error;
+  }
+}
+
+// async function npmVersion(nextVersion: string) {
+//   try {
+//     const releaseType = await determineReleaseType();
+//     const currentBranch = await getCurrentBranch();
+
+//     await updatePackageVersion();
+
+//     if (releaseType === ReleaseType.Prerelease) {
+//       await execa("npm", ["version", "prerelease", "--preid", currentBranch]);
+
+//       // npm version prerelease --preid alpha -m "Upgrade to %s for reasons" -f
+//       console.log("Version prerelease mise à jour");
+//     } else {
+//       await execa("npm", ["version", nextVersion]);
+//       console.log(`Version ${nextVersion} mise à jour`);
+//     }
+//   } catch (error) {
+//     console.error(
+//       "Erreur lors de la mise à jour de la version du package:",
+//       error
+//     );
+//     throw error;
+//   }
+// }
+
+async function publishToNpm() {
+  try {
+    const currentBranch = await getCurrentBranch();
+
+    await execa("npm", ["publish", "--tag", currentBranch]);
+    console.log("Package publié sur npm");
+  } catch (error) {
+    console.error("Erreur lors de la publication sur npm:", error);
+    throw error;
+  }
+}
+
+async function createTag(prefix: string = "v", nextVersion: string) {
+  try {
+    const { name } = await git.addTag(`${prefix}${nextVersion}`);
+    return name;
+  } catch (error) {
+    console.error("Erreur lors de la publication sur npm:", error);
+    throw error;
+  }
+}
+
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+async function createGithubRelease(
+  owner: string = "ccreusat",
+  repo: string = "simple-release",
+  tag_name: string
+) {
+  try {
+    const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
+
+    await octokit.repos.createRelease({
+      owner,
+      repo,
+      tag_name,
+      name: tag_name,
+      body: releaseNotes,
+      draft: false,
+      prerelease: (await determineReleaseType()) === ReleaseType.Prerelease,
+    });
+
+    console.log("Release GitHub créée avec succès");
+  } catch (error) {
+    console.error("Erreur lors de la création de la release GitHub:", error);
+    throw error;
+  }
+}
+
+async function createGitlabRelease() {
+  try {
+    const response = await fetch(
+      `https://gitlab.com/api/v4/projects/${config?.gitlab?.projectId}/releases`,
       {
-        tag_name: tag,
-        name: `Release ${tag}`,
-        body: releaseNote,
-      },
-      {
+        method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+          // "PRIVATE-TOKEN": config?.gitlab?.token,
         },
+        body: JSON.stringify({
+          name: `v${await determineVersion()}`,
+          tag_name: `v${await determineVersion()}`,
+          description: "Notes de release...",
+        }),
       }
     );
 
-    console.log(`Release créée avec succès : ${response.data.html_url}`);
+    if (!response.ok) {
+      throw new Error(
+        `Échec de la création de la release GitLab : ${response.statusText}`
+      );
+    }
+
+    console.log("Release GitLab créée avec succès");
   } catch (error) {
-    console.error(error);
-    console.error("Erreur lors de la création de la release :", error.message);
+    console.error("Erreur lors de la création de la release GitLab:", error);
+    throw error;
   }
 }
 
-function prepareReleaseNote(commits) {
-  let releaseNote = "## Release Note\n\n";
-  /* const formatedCommits = commits.map((commit) => {
-    return {
-      message: commit.message,
-      author: commit.author_name,
-    };
-  }); */
+async function pushContent(nextVersion: string) {
+  try {
+    const currentBranch = await getCurrentBranch();
+    const statusSummary = await git.status();
+    const filesToAdd = statusSummary.files.map((file) => file.path);
+    const releaseType = await determineReleaseType();
 
-  for (const type in commits) {
-    console.log({ type });
-    if (type === "fix") {
-      releaseNote += `### Fixes\n\n`;
-      for (const commit of commits[type]) {
-        releaseNote += `- ${commit.message}. Thank you ${commit.author_name}\n`;
-      }
-      releaseNote += "\n";
-    }
-    if (type === "chore") {
-      releaseNote += `### Chore\n\n`;
-      for (const commit of commits[type]) {
-        releaseNote += `- ${commit.message}. Thank you ${commit.author_name}\n`;
-      }
-      releaseNote += "\n";
-    }
+    const gitMessage =
+      config.git.commit?.message ||
+      `chore: ${
+        releaseType === ReleaseType.Prerelease ? "prerelease" : "release"
+      }: ${nextVersion}`;
+
+    await git.add(filesToAdd);
+    await git.commit(gitMessage);
+    await git.push("origin", currentBranch);
+  } catch (error) {
+    console.error("Erreur:", error);
+    throw error;
   }
-
-  console.log({ releaseNote });
-
-  return releaseNote;
-
-  /* console.log(commits.map((commit) => commit)); */
-  // return formatedCommits;
 }
 
-function groupCommitsByType(commits) {
-  const groupedCommits = {};
+// --- Fonction Principale ---
+async function createRelease() {
+  const currentBranch = await getCurrentBranch();
+  const currentVersion = await getCurrentPackageVersion();
+  const lastTag = await getLastTag();
+  const nextVersion = await getNextVersion();
+  const newTag = await createTag(config.git.customPrefix, nextVersion);
 
-  for (const commit of commits) {
-    const match = commit.message.match(/^(chore|fix|feat):/i);
+  console.log({ currentVersion, lastTag, newTag, nextVersion });
 
-    if (match && match[1]) {
-      const type = match[1].toLowerCase();
-      if (!groupedCommits[type]) {
-        groupedCommits[type] = [];
+  try {
+    if (config.git.handle_working_tree) await pushContent(nextVersion);
+
+    if (config.npm.publish) await publishToNpm();
+
+    if (config.github?.enableReleaseNotes) {
+      if (
+        !config.releaseBranches.find((branch) => branch.name === currentBranch)
+          ?.enableReleaseNotes
+      ) {
+        return;
       }
-      groupedCommits[type].push(commit);
+
+      await createGithubRelease("ccreusat", "simple-release", newTag);
     }
+
+    if (config.gitlab) {
+      if (
+        !config.releaseBranches.find((branch) => branch.name === currentBranch)
+          ?.enableReleaseNotes
+      ) {
+        return;
+      }
+
+      await createGitlabRelease();
+    }
+  } catch (error) {
+    console.error("Erreur globale lors de la création de la release:", error);
+    throw error;
   }
-
-  return groupedCommits;
 }
 
-async function run() {
-  const commits = await getLastCommits();
-
-  const commitCounts = parsedCommits(commits);
-  const releaseType = determineReleaseType(commits, commitCounts);
-
-  const nextVersion = await incrementVersion(pkg.version, releaseType);
-
-  updatePackageJson(nextVersion);
-
-  console.log({ releaseType, nextVersion });
-
-  await pushContent(nextVersion);
-
-  await execa("git", ["tag", `v${nextVersion}`]);
-  await execa("git", ["push", "--tags"]);
-
-  // Remplacez les valeurs suivantes par vos informations GitHub
-  const owner = "ccreusat";
-  const repo = "simple-release";
-  const token = process.env.GITHUB_TOKEN;
-
-  const groupCommits = groupCommitsByType(commits);
-  // const releaseNote = prepareReleaseNote(groupCommits);
-
-  const releaseNote = "Contenu de la release note...\n\nAutres détails...";
-
-  createReleaseNote(owner, repo, nextVersion, token, releaseNote);
-  // generateReleaseNote(owner, repo, token);
-}
-
-run();
+// --- Exécution ---
+createRelease()
+  .then(() => console.log("Release terminée avec succès"))
+  .catch((error) => console.error("Erreur lors de la release:", error));
