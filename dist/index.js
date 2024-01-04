@@ -6493,11 +6493,16 @@ async function determineVersion() {
 }
 async function getNextVersion() {
     try {
+        const releaseType = await determineReleaseType();
         const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-        const [versionNumber, prerelease] = pkg.version.split("-");
-        console.log({ versionNumber, prerelease });
-        const version = semver$1.inc("1.5.4-alpha.1", "prerelease");
-        return version;
+        let nextVersion;
+        if (releaseType === ReleaseType.Prerelease) {
+            nextVersion = semver$1.inc(pkg.version, "prerelease");
+        }
+        else {
+            nextVersion = semver$1.inc(pkg.version, "prerelease");
+        }
+        return nextVersion;
     }
     catch (error) {
         console.error("Erreur: ", error);
