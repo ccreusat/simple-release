@@ -372,7 +372,8 @@ async function createRelease() {
 
     if (config.npm.publish) await publishToNpm();
 
-    if (config.github) createGithubRelease(newTag);
+    if (config.github)
+      createGithubRelease("ccreusat", "simple-release", newTag);
 
     if (config.gitlab) await createGitlabRelease();
   } catch (error) {

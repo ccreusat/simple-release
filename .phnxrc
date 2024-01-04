@@ -3,7 +3,7 @@
         "handle_working_tree": true,
         "customPrefix": "phnx"
     },
-    "github": false,
+    "github": true,
     "npm": {
         "versioning": true,
         "publish": false
