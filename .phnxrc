@@ -6,8 +6,7 @@
         "enableReleaseNotes": true
     },
     "npm": {
-        "versioning": true,
-        "publish": false
+        "publish": true
     },
     "baseBranch": "main",
     "releaseBranches": [
