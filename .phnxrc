@@ -3,7 +3,7 @@
         "handle_working_tree": true
     },
     "github": {
-        "enableReleaseNotes": false
+        "enableReleaseNotes": true
     },
     "npm": {
         "versioning": true,
