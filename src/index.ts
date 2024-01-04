@@ -218,7 +218,9 @@ async function getNextVersion() {
       readFileSync(new URL("../package.json", import.meta.url), "utf8")
     );
 
-    console.log(pkg.version.split("-"));
+    const [versionNumber, prerelease] = pkg.version.split("-");
+
+    console.log({ versionNumber, prerelease });
 
     const version = semver.inc("1.5.4", "prerelease", "alpha", "1");
     return version;
