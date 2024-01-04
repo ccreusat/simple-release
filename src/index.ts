@@ -359,9 +359,9 @@ async function createRelease() {
   const currentVersion = await getCurrentPackageVersion();
   const lastTag = await getLastTag();
   const nextVersion = await getNextVersion();
-  const newTag = await createTag(nextVersion);
+  const newTag = await createTag("v", nextVersion);
 
-  console.log({ currentVersion, lastTag, nextVersion });
+  console.log({ currentVersion, ...{ lastTag, newTag }, nextVersion });
 
   try {
     if (config.git.handle_working_tree) await pushContent(nextVersion);
