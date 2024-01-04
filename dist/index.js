@@ -3574,6 +3574,7 @@ async function pushContent(nextVersion) {
     const currentBranch = await getCurrentBranch();
     const statusSummary = await git.status();
     const filesToAdd = statusSummary.files.map((file) => file.path);
+    console.log({ nextVersion });
     const gitMessage = config.git.commit.message || `chore: release: ${nextVersion}`;
     await git.add(filesToAdd);
     await git.commit(gitMessage);
