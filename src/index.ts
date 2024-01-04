@@ -277,8 +277,8 @@ async function publishToNpm() {
 
 async function createTag(prefix: string = "v", nextVersion: string) {
   try {
-    const newTag = await git.addTag(`${prefix}${nextVersion}`);
-    return newTag;
+    const { name } = await git.addTag(`${prefix}${nextVersion}`);
+    return name;
   } catch (error) {
     console.error("Erreur lors de la publication sur npm:", error);
     throw error;
@@ -287,17 +287,19 @@ async function createTag(prefix: string = "v", nextVersion: string) {
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-async function createGithubRelease() {
+async function createGithubRelease(
+  owner: string = "ccreusat",
+  repo: string = "simple-release",
+  tag_name: string
+) {
   try {
-    const nextVersion = await getNextVersion();
-    const tagName = `v${nextVersion}`;
     const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
 
     await octokit.repos.createRelease({
-      owner: "ccreusat",
-      repo: "simple-release",
-      tag_name: tagName,
-      name: tagName,
+      owner,
+      repo,
+      tag_name,
+      name: tag_name,
       body: releaseNotes,
       draft: false,
       prerelease: (await determineReleaseType()) === ReleaseType.Prerelease,
@@ -370,7 +372,7 @@ async function createRelease() {
 
     if (config.npm.publish) await publishToNpm();
 
-    if (config.github) createGithubRelease();
+    if (config.github) createGithubRelease(newTag);
 
     if (config.gitlab) await createGitlabRelease();
   } catch (error) {
