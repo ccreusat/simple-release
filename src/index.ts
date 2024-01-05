@@ -246,8 +246,8 @@ async function determineVersion(): Promise<string> {
       return "major";
     } else if (featCount >= fixCount) {
       return "minor";
-    } else {
-      throw new Error("Could not find any commit");
+    } else if (fixCount >= featCount) {
+      return "patch";
     }
   } catch (error) {
     console.error("Erreur lors de la détermination de la version:", error);
