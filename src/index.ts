@@ -127,10 +127,7 @@ const config: ReleaseConfig = { ...defaultConfig, ...userConfig?.config };
 
 const git: SimpleGit = simpleGit();
 
-enum LibReleaseType {
-  Release = "release",
-  Prerelease = "prerelease",
-}
+type Canary = boolean;
 
 async function getCurrentBranch(): Promise<string> {
   try {
@@ -147,22 +144,20 @@ async function getCurrentBranch(): Promise<string> {
   }
 }
 
-async function determineReleaseType(
-  currentBranch: string
-): Promise<LibReleaseType> {
+async function determineCanary(currentBranch: string): Promise<Canary> {
   try {
     if (RELEASE_BRANCHES.includes(currentBranch)) {
-      return LibReleaseType.Release;
+      return false;
     } else if (PRERELEASE_BRANCHES.includes(currentBranch)) {
-      return LibReleaseType.Prerelease;
+      return true;
     } else if (
       config.releaseBranches.find((branch) => branch.name === currentBranch)
     ) {
       return config.releaseBranches.find(
         (branch) => branch.name === currentBranch
       )?.prerelease
-        ? LibReleaseType.Prerelease
-        : LibReleaseType.Release;
+        ? true
+        : false;
     }
     throw new Error(
       `La branche ${currentBranch} n'est pas configurée pour une release ou une prerelease.`
@@ -194,6 +189,8 @@ async function getLastCommits(): Promise<
     const lastTag = await getLastTag();
     const commits = await git.log({ from: lastTag, to: "HEAD" });
 
+    console.log({ commits });
+
     if (commits.all.length === 0)
       throw new Error("No commits found since last tag");
 
@@ -222,8 +219,6 @@ async function determineVersion(): Promise<string> {
   try {
     const commits = await getLastCommits();
 
-    console.log({ commits });
-
     let fixCount = 0;
     let featCount = 0;
     let breakingChangeCount = 0;
@@ -248,6 +243,8 @@ async function determineVersion(): Promise<string> {
       return "minor";
     } else if (fixCount >= featCount) {
       return "patch";
+    } else {
+      return "";
     }
   } catch (error) {
     console.error("Erreur lors de la détermination de la version:", error);
@@ -272,18 +269,18 @@ async function updatePackageVersion(nextVersion: string) {
 
 async function getNextVersion(
   branch: string,
-  releaseType: string,
-  versionType: string
+  canary: boolean,
+  releaseType: string
 ) {
   const pkg = getPackageJson();
 
   try {
     let nextVersion: string | null;
 
-    if (releaseType === LibReleaseType.Prerelease) {
+    if (canary) {
       nextVersion = semver.inc(pkg.version, "prerelease", branch);
     } else {
-      nextVersion = semver.inc(pkg.version, versionType as ReleaseType);
+      nextVersion = semver.inc(pkg.version, releaseType as ReleaseType);
     }
 
     return nextVersion;
@@ -293,9 +290,9 @@ async function getNextVersion(
   }
 }
 
-async function publishToNpm(branch: string, releaseType: string) {
+async function publishToNpm(branch: string, canary: boolean) {
   try {
-    if (releaseType === LibReleaseType.Prerelease) {
+    if (canary) {
       await execa("npm", ["publish", "--tag", branch]);
     } else {
       await execa("npm", ["publish"]);
@@ -341,9 +338,7 @@ async function createGithubRelease(
       name: tag_name,
       body,
       draft: false,
-      prerelease:
-        (await determineReleaseType(currentBranch)) ===
-        LibReleaseType.Prerelease,
+      prerelease: (await determineCanary(currentBranch)) === true,
     });
 
     console.log("Release GitHub créée avec succès");
@@ -355,7 +350,7 @@ async function createGithubRelease(
 
 async function pushContent(
   branch: string,
-  releaseType: string,
+  canary: boolean,
   nextVersion: string
 ) {
   try {
@@ -364,9 +359,7 @@ async function pushContent(
 
     const gitMessage =
       config.git.commit?.message ||
-      `chore: ${
-        releaseType === LibReleaseType.Prerelease ? "prerelease" : "release"
-      }: ${nextVersion}`;
+      `chore: ${canary ? "prerelease" : "release"}: ${nextVersion}`;
 
     await git.add(filesToAdd);
     await git.commit(gitMessage);
@@ -380,30 +373,22 @@ async function pushContent(
 // --- Fonction Principale ---
 async function createRelease() {
   const currentBranch = await getCurrentBranch();
-  const releaseType = await determineReleaseType(currentBranch);
-  const versionType = await determineVersion();
-  const currentVersion = await getCurrentPackageVersion();
-
-  console.log({ versionType });
-  const nextVersion = await getNextVersion(
-    currentBranch,
-    releaseType,
-    versionType
-  );
-  const lastTag = await getLastTag();
-  // const newTag = await createTag(config.git.tagPrefix, nextVersion as string);
-  const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
   const commits = await getLastCommits();
-  console.table({ currentVersion, lastTag, nextVersion, commits });
-
-  // await updateMetadataForRelease(nextVersion as string, releaseNotes, commits);
+  const canary = await determineCanary(currentBranch);
+  const releaseType = await determineVersion();
+  const currentVersion = await getCurrentPackageVersion();
+  const nextVersion = await getNextVersion(currentBranch, canary, releaseType);
+  const lastTag = await getLastTag();
+  const newTag = await createTag(config.git.tagPrefix, nextVersion as string);
+  const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
+  console.table({ currentVersion, lastTag, releaseType, nextVersion, commits });
 
   try {
-    // await updatePackageVersion(nextVersion as string);
-    /* if (config.git.handle_working_tree)
-      await pushContent(currentBranch, releaseType, nextVersion as string);
+    await updatePackageVersion(nextVersion as string);
+    if (config.git.handle_working_tree)
+      await pushContent(currentBranch, canary, nextVersion as string);
 
-    if (config.npm.publish) await publishToNpm(currentBranch, releaseType);
+    if (config.npm.publish) await publishToNpm(currentBranch, canary);
 
     if (config.github?.createGithubRelease) {
       if (
@@ -419,7 +404,13 @@ async function createRelease() {
         tag_name: newTag,
         body: releaseNotes,
       });
-    } */
+    }
+
+    await updateMetadataForRelease(
+      nextVersion as string,
+      releaseNotes,
+      commits
+    );
   } catch (error) {
     console.error("Erreur globale lors de la création de la release:", error);
     throw error;
