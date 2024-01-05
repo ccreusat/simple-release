@@ -3,7 +3,7 @@
         "handle_working_tree": true
     },
     "github": {
-        "createGithubRelease": true
+        "createGithubRelease": false
     },
     "npm": {
         "publish": false

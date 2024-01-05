@@ -1,7 +1,7 @@
 import { cosmiconfigSync } from 'cosmiconfig';
 import { execa } from 'execa';
 import { Octokit } from '@octokit/rest';
-import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import semver from 'semver';
 import simpleGit from 'simple-git';
 
@@ -33,7 +33,10 @@ async function updateMetadataForRelease(newVersion, notes, commits) {
     metadata.versions.push(newVersionMetadata);
     writeMetadata(metadata);
 }
-const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+function getPackageJson() {
+    const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+    return pkg;
+}
 const defaultConfig = {
     git: {
         handle_working_tree: true,
@@ -105,6 +108,7 @@ async function determineReleaseType(currentBranch) {
 }
 function getCurrentPackageVersion() {
     try {
+        const pkg = getPackageJson();
         const packageVersion = pkg.version;
         return packageVersion;
     }
@@ -172,9 +176,8 @@ async function determineVersion() {
 }
 async function updatePackageVersion(nextVersion) {
     try {
-        const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+        const pkg = getPackageJson();
         pkg.version = nextVersion;
-        console.log({ pkg, nextVersion }, pkg.version);
         writeFileSync(new URL("../package.json", import.meta.url), JSON.stringify(pkg, null, 2));
     }
     catch (error) {
@@ -183,7 +186,7 @@ async function updatePackageVersion(nextVersion) {
     }
 }
 async function getNextVersion(branch, releaseType, versionType) {
-    console.log({ branch, releaseType, versionType });
+    const pkg = getPackageJson();
     try {
         let nextVersion;
         if (releaseType === LibReleaseType.Prerelease) {
@@ -272,6 +275,7 @@ async function createRelease() {
     const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
     const commits = await getLastCommits();
     console.table({ currentVersion, lastTag, newTag, nextVersion });
+    console.log({ commits });
     await updateMetadataForRelease(nextVersion, releaseNotes, commits);
     try {
         if (config.git.handle_working_tree)
@@ -296,7 +300,6 @@ async function createRelease() {
         throw error;
     }
 }
-// --- Exécution ---
 createRelease()
     .then(() => console.log("Release terminée avec succès"))
     .catch((error) => console.error("Erreur lors de la release:", error));

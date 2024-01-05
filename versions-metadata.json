@@ -17,6 +17,18 @@
       "date": "2024-01-05T11:15:21.836Z",
       "notes": "Notes de release...",
       "commits": []
+    },
+    {
+      "version": "1.8.1-alpha.5",
+      "date": "2024-01-05T11:18:18.532Z",
+      "notes": "Notes de release...",
+      "commits": []
+    },
+    {
+      "version": "1.8.1-alpha.6",
+      "date": "2024-01-05T11:23:03.671Z",
+      "notes": "Notes de release...",
+      "commits": []
     }
   ]
 }

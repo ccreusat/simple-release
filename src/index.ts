@@ -83,9 +83,13 @@ async function updateMetadataForRelease(
   writeMetadata(metadata);
 }
 
-const pkg = JSON.parse(
-  readFileSync(new URL("../package.json", import.meta.url), "utf8")
-);
+function getPackageJson() {
+  const pkg = JSON.parse(
+    readFileSync(new URL("../package.json", import.meta.url), "utf8")
+  );
+
+  return pkg;
+}
 
 const defaultConfig: ReleaseConfig = {
   git: {
@@ -171,6 +175,7 @@ async function determineReleaseType(
 
 function getCurrentPackageVersion(): string {
   try {
+    const pkg = getPackageJson();
     const packageVersion = pkg.version;
     return packageVersion;
   } catch (error) {
@@ -245,12 +250,9 @@ async function determineVersion(): Promise<string> {
 
 async function updatePackageVersion(nextVersion: string) {
   try {
-    const pkg = JSON.parse(
-      readFileSync(new URL("../package.json", import.meta.url), "utf8")
-    );
+    const pkg = getPackageJson();
     pkg.version = nextVersion;
 
-    console.log({ pkg, nextVersion }, pkg.version);
     writeFileSync(
       new URL("../package.json", import.meta.url),
       JSON.stringify(pkg, null, 2)
@@ -266,7 +268,8 @@ async function getNextVersion(
   releaseType: string,
   versionType: string
 ) {
-  console.log({ branch, releaseType, versionType });
+  const pkg = getPackageJson();
+
   try {
     let nextVersion: string | null;
 
@@ -386,6 +389,8 @@ async function createRelease() {
   const commits = await getLastCommits();
   console.table({ currentVersion, lastTag, newTag, nextVersion });
 
+  console.log({ commits });
+
   await updateMetadataForRelease(nextVersion as string, releaseNotes, commits);
 
   try {
@@ -415,7 +420,6 @@ async function createRelease() {
   }
 }
 
-// --- Exécution ---
 createRelease()
   .then(() => console.log("Release terminée avec succès"))
   .catch((error) => console.error("Erreur lors de la release:", error));
