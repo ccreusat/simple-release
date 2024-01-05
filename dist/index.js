@@ -44,11 +44,11 @@ const defaultConfig = {
 const userConfig = explorer.search();
 const config = { ...defaultConfig, ...userConfig?.config };
 const git = simpleGit();
-var ReleaseType;
-(function (ReleaseType) {
-    ReleaseType["Release"] = "release";
-    ReleaseType["Prerelease"] = "prerelease";
-})(ReleaseType || (ReleaseType = {}));
+var LibReleaseType;
+(function (LibReleaseType) {
+    LibReleaseType["Release"] = "release";
+    LibReleaseType["Prerelease"] = "prerelease";
+})(LibReleaseType || (LibReleaseType = {}));
 async function getCurrentBranch() {
     try {
         const branchSummary = await git.branch();
@@ -64,15 +64,15 @@ async function determineReleaseType() {
     try {
         const currentBranch = await getCurrentBranch();
         if (RELEASE_BRANCHES.includes(currentBranch)) {
-            return ReleaseType.Release;
+            return LibReleaseType.Release;
         }
         else if (PRERELEASE_BRANCHES.includes(currentBranch)) {
-            return ReleaseType.Prerelease;
+            return LibReleaseType.Prerelease;
         }
         else if (config.releaseBranches.find((branch) => branch.name === currentBranch)) {
             return config.releaseBranches.find((branch) => branch.name === currentBranch)?.prerelease
-                ? ReleaseType.Prerelease
-                : ReleaseType.Release;
+                ? LibReleaseType.Prerelease
+                : LibReleaseType.Release;
         }
         throw new Error(`La branche ${currentBranch} n'est pas configurée pour une release ou une prerelease.`);
     }
@@ -164,14 +164,13 @@ async function getNextVersion(branch, releaseType, versionType) {
     console.log({ branch, releaseType, versionType });
     try {
         let nextVersion;
-        const lastTag = await getLastTag();
-        if (releaseType === ReleaseType.Prerelease) {
+        if (releaseType === LibReleaseType.Prerelease) {
             nextVersion = semver.inc(pkg.version, "prerelease", branch);
         }
         else {
             nextVersion = semver.inc(pkg.version, versionType);
         }
-        await updatePackageVersion(lastTag);
+        await updatePackageVersion(nextVersion);
         return nextVersion;
     }
     catch (error) {
@@ -181,7 +180,7 @@ async function getNextVersion(branch, releaseType, versionType) {
 }
 async function publishToNpm(branch, releaseType) {
     try {
-        if (releaseType === ReleaseType.Prerelease) {
+        if (releaseType === LibReleaseType.Prerelease) {
             await execa("npm", ["publish", "--tag", branch]);
         }
         else {
@@ -215,7 +214,7 @@ async function createGithubRelease(owner = "ccreusat", repo = "simple-release", 
             name: tag_name,
             body: releaseNotes,
             draft: false,
-            prerelease: (await determineReleaseType()) === ReleaseType.Prerelease,
+            prerelease: (await determineReleaseType()) === LibReleaseType.Prerelease,
         });
         console.log("Release GitHub créée avec succès");
     }
@@ -229,7 +228,7 @@ async function pushContent(branch, releaseType, nextVersion) {
         const statusSummary = await git.status();
         const filesToAdd = statusSummary.files.map((file) => file.path);
         const gitMessage = config.git.commit?.message ||
-            `chore: ${releaseType === ReleaseType.Prerelease ? "prerelease" : "release"}: ${nextVersion}`;
+            `chore: ${releaseType === LibReleaseType.Prerelease ? "prerelease" : "release"}: ${nextVersion}`;
         await git.add(filesToAdd);
         await git.commit(gitMessage);
         await git.push("origin", branch);

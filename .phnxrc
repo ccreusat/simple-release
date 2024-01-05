@@ -6,7 +6,7 @@
         "createGithubRelease": true
     },
     "npm": {
-        "publish": true
+        "publish": false
     },
     "baseBranch": "main",
     "releaseBranches": [
