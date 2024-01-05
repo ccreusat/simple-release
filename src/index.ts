@@ -197,6 +197,9 @@ async function determineVersion(): Promise<string> {
 
 async function updatePackageVersion(nextVersion: string) {
   try {
+    const pkg = JSON.parse(
+      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+    );
     pkg.version = nextVersion;
 
     writeFileSync(

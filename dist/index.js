@@ -150,6 +150,7 @@ async function determineVersion() {
 }
 async function updatePackageVersion(nextVersion) {
     try {
+        const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
         pkg.version = nextVersion;
         writeFileSync(new URL("../package.json", import.meta.url), JSON.stringify(pkg, null, 2));
     }
