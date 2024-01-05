@@ -1,36 +1,47 @@
 import { cosmiconfigSync } from "cosmiconfig";
 import { execa } from "execa";
 import { Octokit } from "@octokit/rest";
-import { PRERELEASE_BRANCH, RELEASE_BRANCH } from "./constants/default-branch";
-import { readFileSync, writeFileSync } from "fs";
-import semver from "semver";
-import simpleGit, { SimpleGit } from "simple-git";
+import {
+  PRERELEASE_BRANCHES,
+  RELEASE_BRANCHES,
+} from "./constants/default-branch";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import semver, { ReleaseType } from "semver";
+import simpleGit, {
+  DefaultLogFields,
+  ListLogLine,
+  SimpleGit,
+} from "simple-git";
+
+interface VersionMetadata {
+  version: string;
+  date: string;
+  notes: string;
+  commits?: readonly (DefaultLogFields & ListLogLine)[];
+}
+
+interface Metadata {
+  versions: VersionMetadata[];
+}
 
 interface ReleaseBranches {
   name: string;
   prerelease: boolean;
-  enableReleaseNotes: boolean;
+  createGithubRelease: boolean;
 }
 
 interface ReleaseConfig {
   git: {
     handle_working_tree: boolean;
-    customPrefix?: string;
+    tagPrefix?: string;
     commit?: {
       message?: string;
     };
   };
   github?: {
-    enableReleaseNotes: boolean;
+    createGithubRelease: boolean;
   };
-  gitlab?:
-    | boolean
-    | {
-        token: string;
-        projectId: string;
-      };
   npm: {
-    versioning: boolean;
     publish: boolean;
   };
   baseBranch: string;
@@ -40,19 +51,55 @@ interface ReleaseConfig {
 const moduleName = "phnx";
 const explorer = cosmiconfigSync(moduleName);
 
+const metadataFilePath = "./versions-metadata.json";
+
+function readMetadata(): Metadata {
+  if (existsSync(metadataFilePath)) {
+    return JSON.parse(readFileSync(metadataFilePath, "utf8"));
+  } else {
+    return { versions: [] };
+  }
+}
+
+function writeMetadata(metadata: Metadata) {
+  writeFileSync(metadataFilePath, JSON.stringify(metadata, null, 2));
+}
+
+async function updateMetadataForRelease(
+  newVersion: string,
+  notes: string,
+  commits?: readonly (DefaultLogFields & ListLogLine)[]
+) {
+  const metadata = readMetadata();
+
+  const newVersionMetadata: VersionMetadata = {
+    version: newVersion,
+    date: new Date().toISOString(),
+    notes: notes,
+    commits: commits,
+  };
+
+  metadata.versions.push(newVersionMetadata);
+  writeMetadata(metadata);
+}
+
+function getPackageJson() {
+  const pkg = JSON.parse(
+    readFileSync(new URL("../package.json", import.meta.url), "utf8")
+  );
+
+  return pkg;
+}
+
 const defaultConfig: ReleaseConfig = {
   git: {
     handle_working_tree: true,
-    customPrefix: "v",
-    /* commit: {
-      message: "chore: release",
-    }, */
+    tagPrefix: "v",
   },
   github: {
-    enableReleaseNotes: true,
+    createGithubRelease: true,
   },
   npm: {
-    versioning: true,
     publish: true,
   },
   baseBranch: "main",
@@ -60,17 +107,17 @@ const defaultConfig: ReleaseConfig = {
     {
       name: "alpha",
       prerelease: true,
-      enableReleaseNotes: false,
+      createGithubRelease: false,
     },
     {
       name: "beta",
       prerelease: true,
-      enableReleaseNotes: false,
+      createGithubRelease: false,
     },
     {
       name: "rc",
       prerelease: true,
-      enableReleaseNotes: false,
+      createGithubRelease: false,
     },
   ],
 };
@@ -80,10 +127,7 @@ const config: ReleaseConfig = { ...defaultConfig, ...userConfig?.config };
 
 const git: SimpleGit = simpleGit();
 
-enum ReleaseType {
-  Release = "release",
-  Prerelease = "prerelease",
-}
+type Canary = boolean;
 
 async function getCurrentBranch(): Promise<string> {
   try {
@@ -100,21 +144,20 @@ async function getCurrentBranch(): Promise<string> {
   }
 }
 
-async function determineReleaseType(): Promise<ReleaseType> {
+async function determineCanary(currentBranch: string): Promise<Canary> {
   try {
-    const currentBranch = await getCurrentBranch();
-    if (RELEASE_BRANCH.includes(currentBranch)) {
-      return ReleaseType.Release;
-    } else if (PRERELEASE_BRANCH.includes(currentBranch)) {
-      return ReleaseType.Prerelease;
+    if (RELEASE_BRANCHES.includes(currentBranch)) {
+      return false;
+    } else if (PRERELEASE_BRANCHES.includes(currentBranch)) {
+      return true;
     } else if (
       config.releaseBranches.find((branch) => branch.name === currentBranch)
     ) {
       return config.releaseBranches.find(
         (branch) => branch.name === currentBranch
       )?.prerelease
-        ? ReleaseType.Prerelease
-        : ReleaseType.Release;
+        ? true
+        : false;
     }
     throw new Error(
       `La branche ${currentBranch} n'est pas configurée pour une release ou une prerelease.`
@@ -127,9 +170,7 @@ async function determineReleaseType(): Promise<ReleaseType> {
 
 function getCurrentPackageVersion(): string {
   try {
-    const pkg = JSON.parse(
-      readFileSync(new URL("../package.json", import.meta.url), "utf8")
-    );
+    const pkg = getPackageJson();
     const packageVersion = pkg.version;
     return packageVersion;
   } catch (error) {
@@ -141,15 +182,20 @@ function getCurrentPackageVersion(): string {
   }
 }
 
-async function getLastCommits() {
+async function getLastCommits(): Promise<
+  readonly (DefaultLogFields & ListLogLine)[]
+> {
   try {
     const lastTag = await getLastTag();
     const commits = await git.log({ from: lastTag, to: "HEAD" });
 
+    if (commits.all.length === 0)
+      throw new Error("No commits found since last tag");
+
     return commits.all;
   } catch (error) {
-    console.error("Something wrong happened:", error);
-    process.exit(1);
+    console.error(error);
+    throw error;
   }
 }
 
@@ -193,8 +239,10 @@ async function determineVersion(): Promise<string> {
       return "major";
     } else if (featCount >= fixCount) {
       return "minor";
-    } else {
+    } else if (fixCount >= featCount) {
       return "patch";
+    } else {
+      return "";
     }
   } catch (error) {
     console.error("Erreur lors de la détermination de la version:", error);
@@ -204,10 +252,7 @@ async function determineVersion(): Promise<string> {
 
 async function updatePackageVersion(nextVersion: string) {
   try {
-    const pkg = JSON.parse(
-      readFileSync(new URL("../package.json", import.meta.url), "utf8")
-    );
-
+    const pkg = getPackageJson();
     pkg.version = nextVersion;
 
     writeFileSync(
@@ -220,25 +265,21 @@ async function updatePackageVersion(nextVersion: string) {
   }
 }
 
-async function getNextVersion() {
+async function getNextVersion(
+  branch: string,
+  canary: boolean,
+  releaseType: string
+) {
+  const pkg = getPackageJson();
+
   try {
-    const releaseType = await determineReleaseType();
-    const currentBranch = await getCurrentBranch();
-    const versionType = await determineVersion();
+    let nextVersion: string | null;
 
-    const pkg = JSON.parse(
-      readFileSync(new URL("../package.json", import.meta.url), "utf8")
-    );
-
-    let nextVersion;
-
-    if (releaseType === ReleaseType.Prerelease) {
-      nextVersion = semver.inc(pkg.version, "prerelease", currentBranch);
+    if (canary) {
+      nextVersion = semver.inc(pkg.version, "prerelease", branch);
     } else {
-      nextVersion = semver.inc(pkg.version, versionType);
+      nextVersion = semver.inc(pkg.version, releaseType as ReleaseType);
     }
-
-    await updatePackageVersion(nextVersion);
 
     return nextVersion;
   } catch (error) {
@@ -247,13 +288,10 @@ async function getNextVersion() {
   }
 }
 
-async function publishToNpm() {
+async function publishToNpm(branch: string, canary: boolean) {
   try {
-    const currentBranch = await getCurrentBranch();
-    const releaseType = await determineReleaseType();
-
-    if (releaseType === ReleaseType.Prerelease) {
-      await execa("npm", ["publish", "--tag", currentBranch]);
+    if (canary) {
+      await execa("npm", ["publish", "--tag", branch]);
     } else {
       await execa("npm", ["publish"]);
     }
@@ -277,21 +315,28 @@ async function createTag(prefix: string = "v", nextVersion: string) {
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 async function createGithubRelease(
-  owner: string = "ccreusat",
-  repo: string = "simple-release",
-  tag_name: string
+  currentBranch: string,
+  {
+    owner = "ccreusat",
+    repo = "simple-release",
+    tag_name,
+    body,
+  }: {
+    owner: string;
+    repo: string;
+    tag_name: string;
+    body: string;
+  }
 ) {
   try {
-    const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
-
     await octokit.repos.createRelease({
       owner,
       repo,
       tag_name,
       name: tag_name,
-      body: releaseNotes,
+      body,
       draft: false,
-      prerelease: (await determineReleaseType()) === ReleaseType.Prerelease,
+      prerelease: (await determineCanary(currentBranch)) === true,
     });
 
     console.log("Release GitHub créée avec succès");
@@ -301,102 +346,77 @@ async function createGithubRelease(
   }
 }
 
-async function createGitlabRelease() {
+async function pushContent(
+  branch: string,
+  canary: boolean,
+  nextVersion: string
+) {
   try {
-    const response = await fetch(
-      `https://gitlab.com/api/v4/projects/${config?.gitlab?.projectId}/releases`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // "PRIVATE-TOKEN": config?.gitlab?.token,
-        },
-        body: JSON.stringify({
-          name: `v${await determineVersion()}`,
-          tag_name: `v${await determineVersion()}`,
-          description: "Notes de release...",
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `Échec de la création de la release GitLab : ${response.statusText}`
-      );
-    }
-
-    console.log("Release GitLab créée avec succès");
-  } catch (error) {
-    console.error("Erreur lors de la création de la release GitLab:", error);
-    throw error;
-  }
-}
-
-async function pushContent(nextVersion: string) {
-  try {
-    const currentBranch = await getCurrentBranch();
     const statusSummary = await git.status();
     const filesToAdd = statusSummary.files.map((file) => file.path);
-    const releaseType = await determineReleaseType();
 
     const gitMessage =
       config.git.commit?.message ||
-      `chore: ${
-        releaseType === ReleaseType.Prerelease ? "prerelease" : "release"
-      }: ${nextVersion}`;
+      `chore: ${canary ? "prerelease" : "release"}: ${nextVersion}`;
 
     await git.add(filesToAdd);
     await git.commit(gitMessage);
-    await git.push("origin", currentBranch);
+    await git.push("origin", branch);
   } catch (error) {
     console.error("Erreur:", error);
     throw error;
   }
 }
 
-// --- Fonction Principale ---
 async function createRelease() {
   const currentBranch = await getCurrentBranch();
+  const commits = await getLastCommits();
+  const canary = await determineCanary(currentBranch);
+  const releaseType = await determineVersion();
   const currentVersion = await getCurrentPackageVersion();
+  const nextVersion = await getNextVersion(currentBranch, canary, releaseType);
   const lastTag = await getLastTag();
-  const nextVersion = await getNextVersion();
-  const newTag = await createTag(config.git.customPrefix, nextVersion);
+  const newTag = await createTag(config.git.tagPrefix, nextVersion as string);
+  const releaseNotes = "Notes de release...";
 
-  console.log({ currentVersion, lastTag, newTag, nextVersion });
+  console.table({ currentVersion, lastTag, releaseType, nextVersion, commits });
 
   try {
-    if (config.git.handle_working_tree) await pushContent(nextVersion);
+    await updatePackageVersion(nextVersion as string);
 
-    if (config.npm.publish) await publishToNpm();
+    if (config.git.handle_working_tree) {
+      await pushContent(currentBranch, canary, nextVersion as string);
+    }
 
-    if (config.github?.enableReleaseNotes) {
+    if (config.npm.publish) await publishToNpm(currentBranch, canary);
+
+    if (config.github?.createGithubRelease) {
       if (
         !config.releaseBranches.find((branch) => branch.name === currentBranch)
-          ?.enableReleaseNotes
+          ?.createGithubRelease
       ) {
         return;
       }
 
-      await createGithubRelease("ccreusat", "simple-release", newTag);
+      await createGithubRelease(currentBranch, {
+        owner: "ccreusat",
+        repo: "simple-release",
+        tag_name: newTag,
+        body: releaseNotes,
+      });
     }
 
-    if (config.gitlab) {
-      if (
-        !config.releaseBranches.find((branch) => branch.name === currentBranch)
-          ?.enableReleaseNotes
-      ) {
-        return;
-      }
-
-      await createGitlabRelease();
-    }
+    await updateMetadataForRelease(
+      nextVersion as string,
+      releaseNotes,
+      commits
+    );
   } catch (error) {
     console.error("Erreur globale lors de la création de la release:", error);
     throw error;
   }
 }
 
-// --- Exécution ---
 createRelease()
   .then(() => console.log("Release terminée avec succès"))
   .catch((error) => console.error("Erreur lors de la release:", error));

@@ -1,2 +1,2 @@
-export const RELEASE_BRANCH = ["master", "main"];
-export const PRERELEASE_BRANCH = ["alpha", "beta", "rc", "next"];
+export const RELEASE_BRANCHES = ["master", "main"];
+export const PRERELEASE_BRANCHES = ["alpha", "beta", "rc", "next"];

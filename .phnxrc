@@ -1,34 +1,34 @@
 {
     "git": {
-        "handle_working_tree": true
+        "handle_working_tree": false
     },
     "github": {
-        "enableReleaseNotes": true
+        "createGithubRelease": false
     },
     "npm": {
-        "publish": true
+        "publish": false
     },
     "baseBranch": "main",
     "releaseBranches": [
         {
             "name": "dev",
             "prerelease": false,
-            "enableReleaseNotes": true
+            "createGithubRelease": false
         },
         {
             "name": "alpha",
             "prerelease": true,
-            "enableReleaseNotes": true
+            "createGithubRelease": false
         },
         {
             "name": "beta",
             "prerelease": true,
-            "enableReleaseNotes": true
+            "createGithubRelease": false
         },
         {
             "name": "rc",
             "prerelease": true,
-            "enableReleaseNotes": false
+            "createGithubRelease": false
         }
     ]
 }
