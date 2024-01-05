@@ -218,6 +218,7 @@ async function getNextVersion(
   releaseType: string,
   versionType: string
 ) {
+  console.log({ branch, releaseType, versionType });
   try {
     let nextVersion;
 

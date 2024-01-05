@@ -161,6 +161,7 @@ async function updatePackageVersion(nextVersion) {
     }
 }
 async function getNextVersion(branch, releaseType, versionType) {
+    console.log({ branch, releaseType, versionType });
     try {
         let nextVersion;
         if (releaseType === ReleaseType.Prerelease) {
