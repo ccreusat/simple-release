@@ -194,12 +194,13 @@ async function getLastCommits(): Promise<
     const lastTag = await getLastTag();
     const commits = await git.log({ from: lastTag, to: "HEAD" });
 
-    console.log({ lastTag, commits });
+    if (commits.all.length === 0)
+      throw new Error("No commits found since last tag");
 
     return commits.all;
   } catch (error) {
-    console.error("Something wrong happened:", error);
-    process.exit(1);
+    console.error(error);
+    throw error;
   }
 }
 
@@ -220,6 +221,8 @@ async function getLastTag(): Promise<string> {
 async function determineVersion(): Promise<string> {
   try {
     const commits = await getLastCommits();
+
+    console.log({ commits });
 
     let fixCount = 0;
     let featCount = 0;
@@ -282,8 +285,6 @@ async function getNextVersion(
     } else {
       nextVersion = semver.inc(pkg.version, versionType as ReleaseType);
     }
-
-    await updatePackageVersion(nextVersion as string);
 
     return nextVersion;
   } catch (error) {
@@ -381,24 +382,25 @@ async function createRelease() {
   const currentBranch = await getCurrentBranch();
   const releaseType = await determineReleaseType(currentBranch);
   const versionType = await determineVersion();
+  const currentVersion = await getCurrentPackageVersion();
+
+  console.log({ versionType });
   const nextVersion = await getNextVersion(
     currentBranch,
     releaseType,
     versionType
   );
-  const currentVersion = await getCurrentPackageVersion();
   const lastTag = await getLastTag();
-  const newTag = await createTag(config.git.tagPrefix, nextVersion as string);
+  // const newTag = await createTag(config.git.tagPrefix, nextVersion as string);
   const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
   const commits = await getLastCommits();
-  console.table({ currentVersion, lastTag, newTag, nextVersion });
+  console.table({ currentVersion, lastTag, nextVersion, commits });
 
-  console.log({ commits });
-
-  await updateMetadataForRelease(nextVersion as string, releaseNotes, commits);
+  // await updateMetadataForRelease(nextVersion as string, releaseNotes, commits);
 
   try {
-    if (config.git.handle_working_tree)
+    // await updatePackageVersion(nextVersion as string);
+    /* if (config.git.handle_working_tree)
       await pushContent(currentBranch, releaseType, nextVersion as string);
 
     if (config.npm.publish) await publishToNpm(currentBranch, releaseType);
@@ -417,7 +419,7 @@ async function createRelease() {
         tag_name: newTag,
         body: releaseNotes,
       });
-    }
+    } */
   } catch (error) {
     console.error("Erreur globale lors de la création de la release:", error);
     throw error;
