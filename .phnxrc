@@ -1,9 +1,9 @@
 {
     "git": {
-        "handle_working_tree": false
+        "handle_working_tree": true
     },
     "github": {
-        "createGithubRelease": false
+        "createGithubRelease": true
     },
     "npm": {
         "publish": false
