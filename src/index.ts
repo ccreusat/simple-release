@@ -187,7 +187,9 @@ function getCurrentPackageVersion(): string {
   }
 }
 
-async function getLastCommits() {
+async function getLastCommits(): Promise<
+  readonly (DefaultLogFields & ListLogLine)[]
+> {
   try {
     const lastTag = await getLastTag();
     const commits = await git.log({ from: lastTag, to: "HEAD" });
@@ -242,7 +244,7 @@ async function determineVersion(): Promise<string> {
     } else if (featCount >= fixCount) {
       return "minor";
     } else {
-      return "patch";
+      throw new Error("Could not find any commit");
     }
   } catch (error) {
     console.error("Erreur lors de la détermination de la version:", error);

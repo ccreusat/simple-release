@@ -167,7 +167,7 @@ async function determineVersion() {
             return "minor";
         }
         else {
-            return "patch";
+            throw new Error("Could not find any commit");
         }
     }
     catch (error) {
