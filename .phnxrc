@@ -3,7 +3,7 @@
         "handle_working_tree": true
     },
     "github": {
-        "enableReleaseNotes": true
+        "createGithubRelease": true
     },
     "npm": {
         "publish": true
@@ -13,22 +13,22 @@
         {
             "name": "dev",
             "prerelease": false,
-            "enableReleaseNotes": true
+            "createGithubRelease": false
         },
         {
             "name": "alpha",
             "prerelease": true,
-            "enableReleaseNotes": true
+            "createGithubRelease": false
         },
         {
             "name": "beta",
             "prerelease": true,
-            "enableReleaseNotes": true
+            "createGithubRelease": false
         },
         {
             "name": "rc",
             "prerelease": true,
-            "enableReleaseNotes": false
+            "createGithubRelease": false
         }
     ]
 }
