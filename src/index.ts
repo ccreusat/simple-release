@@ -5,9 +5,24 @@ import {
   PRERELEASE_BRANCHES,
   RELEASE_BRANCHES,
 } from "./constants/default-branch";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync } from "fs";
 import semver, { ReleaseType } from "semver";
-import simpleGit, { SimpleGit } from "simple-git";
+import simpleGit, {
+  DefaultLogFields,
+  ListLogLine,
+  SimpleGit,
+} from "simple-git";
+
+interface VersionMetadata {
+  version: string;
+  date: string;
+  notes: string;
+  commits?: readonly (DefaultLogFields & ListLogLine)[];
+}
+
+interface Metadata {
+  versions: VersionMetadata[];
+}
 
 interface ReleaseBranches {
   name: string;
@@ -35,6 +50,38 @@ interface ReleaseConfig {
 
 const moduleName = "phnx";
 const explorer = cosmiconfigSync(moduleName);
+
+const metadataFilePath = "./versions-metadata.json";
+
+function readMetadata(): Metadata {
+  if (existsSync(metadataFilePath)) {
+    return JSON.parse(readFileSync(metadataFilePath, "utf8"));
+  } else {
+    return { versions: [] };
+  }
+}
+
+function writeMetadata(metadata: Metadata) {
+  writeFileSync(metadataFilePath, JSON.stringify(metadata, null, 2));
+}
+
+async function updateMetadataForRelease(
+  newVersion: string,
+  notes: string,
+  commits?: readonly (DefaultLogFields & ListLogLine)[]
+) {
+  const metadata = readMetadata();
+
+  const newVersionMetadata: VersionMetadata = {
+    version: newVersion,
+    date: new Date().toISOString(),
+    notes: notes,
+    commits: commits,
+  };
+
+  metadata.versions.push(newVersionMetadata);
+  writeMetadata(metadata);
+}
 
 const pkg = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8")
@@ -96,9 +143,10 @@ async function getCurrentBranch(): Promise<string> {
   }
 }
 
-async function determineReleaseType(): Promise<LibReleaseType> {
+async function determineReleaseType(
+  currentBranch: string
+): Promise<LibReleaseType> {
   try {
-    const currentBranch = await getCurrentBranch();
     if (RELEASE_BRANCHES.includes(currentBranch)) {
       return LibReleaseType.Release;
     } else if (PRERELEASE_BRANCHES.includes(currentBranch)) {
@@ -264,21 +312,30 @@ async function createTag(prefix: string = "v", nextVersion: string) {
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 async function createGithubRelease(
-  owner: string = "ccreusat",
-  repo: string = "simple-release",
-  tag_name: string
+  currentBranch: string,
+  {
+    owner = "ccreusat",
+    repo = "simple-release",
+    tag_name,
+    body,
+  }: {
+    owner: string;
+    repo: string;
+    tag_name: string;
+    body: string;
+  }
 ) {
   try {
-    const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
-
     await octokit.repos.createRelease({
       owner,
       repo,
       tag_name,
       name: tag_name,
-      body: releaseNotes,
+      body,
       draft: false,
-      prerelease: (await determineReleaseType()) === LibReleaseType.Prerelease,
+      prerelease:
+        (await determineReleaseType(currentBranch)) ===
+        LibReleaseType.Prerelease,
     });
 
     console.log("Release GitHub créée avec succès");
@@ -315,7 +372,7 @@ async function pushContent(
 // --- Fonction Principale ---
 async function createRelease() {
   const currentBranch = await getCurrentBranch();
-  const releaseType = await determineReleaseType();
+  const releaseType = await determineReleaseType(currentBranch);
   const versionType = await determineVersion();
   const nextVersion = await getNextVersion(
     currentBranch,
@@ -325,8 +382,11 @@ async function createRelease() {
   const currentVersion = await getCurrentPackageVersion();
   const lastTag = await getLastTag();
   const newTag = await createTag(config.git.tagPrefix, nextVersion as string);
-
+  const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
+  const commits = await getLastCommits();
   console.table({ currentVersion, lastTag, newTag, nextVersion });
+
+  await updateMetadataForRelease(nextVersion as string, releaseNotes, commits);
 
   try {
     if (config.git.handle_working_tree)
@@ -342,7 +402,12 @@ async function createRelease() {
         return;
       }
 
-      await createGithubRelease("ccreusat", "simple-release", newTag);
+      await createGithubRelease(currentBranch, {
+        owner: "ccreusat",
+        repo: "simple-release",
+        tag_name: newTag,
+        body: releaseNotes,
+      });
     }
   } catch (error) {
     console.error("Erreur globale lors de la création de la release:", error);

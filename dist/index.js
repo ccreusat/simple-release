@@ -1,7 +1,7 @@
 import { cosmiconfigSync } from 'cosmiconfig';
 import { execa } from 'execa';
 import { Octokit } from '@octokit/rest';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync } from 'fs';
 import semver from 'semver';
 import simpleGit from 'simple-git';
 
@@ -10,6 +10,29 @@ const PRERELEASE_BRANCHES = ["alpha", "beta", "rc", "next"];
 
 const moduleName = "phnx";
 const explorer = cosmiconfigSync(moduleName);
+const metadataFilePath = "./versions-metadata.json";
+function readMetadata() {
+    if (existsSync(metadataFilePath)) {
+        return JSON.parse(readFileSync(metadataFilePath, "utf8"));
+    }
+    else {
+        return { versions: [] };
+    }
+}
+function writeMetadata(metadata) {
+    writeFileSync(metadataFilePath, JSON.stringify(metadata, null, 2));
+}
+async function updateMetadataForRelease(newVersion, notes, commits) {
+    const metadata = readMetadata();
+    const newVersionMetadata = {
+        version: newVersion,
+        date: new Date().toISOString(),
+        notes: notes,
+        commits: commits,
+    };
+    metadata.versions.push(newVersionMetadata);
+    writeMetadata(metadata);
+}
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const defaultConfig = {
     git: {
@@ -60,9 +83,8 @@ async function getCurrentBranch() {
         throw error;
     }
 }
-async function determineReleaseType() {
+async function determineReleaseType(currentBranch) {
     try {
-        const currentBranch = await getCurrentBranch();
         if (RELEASE_BRANCHES.includes(currentBranch)) {
             return LibReleaseType.Release;
         }
@@ -204,17 +226,17 @@ async function createTag(prefix = "v", nextVersion) {
     }
 }
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-async function createGithubRelease(owner = "ccreusat", repo = "simple-release", tag_name) {
+async function createGithubRelease(currentBranch, { owner = "ccreusat", repo = "simple-release", tag_name, body, }) {
     try {
-        const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
         await octokit.repos.createRelease({
             owner,
             repo,
             tag_name,
             name: tag_name,
-            body: releaseNotes,
+            body,
             draft: false,
-            prerelease: (await determineReleaseType()) === LibReleaseType.Prerelease,
+            prerelease: (await determineReleaseType(currentBranch)) ===
+                LibReleaseType.Prerelease,
         });
         console.log("Release GitHub créée avec succès");
     }
@@ -241,13 +263,16 @@ async function pushContent(branch, releaseType, nextVersion) {
 // --- Fonction Principale ---
 async function createRelease() {
     const currentBranch = await getCurrentBranch();
-    const releaseType = await determineReleaseType();
+    const releaseType = await determineReleaseType(currentBranch);
     const versionType = await determineVersion();
     const nextVersion = await getNextVersion(currentBranch, releaseType, versionType);
     const currentVersion = await getCurrentPackageVersion();
     const lastTag = await getLastTag();
     const newTag = await createTag(config.git.tagPrefix, nextVersion);
+    const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
+    const commits = await getLastCommits();
     console.table({ currentVersion, lastTag, newTag, nextVersion });
+    await updateMetadataForRelease(nextVersion, releaseNotes, commits);
     try {
         if (config.git.handle_working_tree)
             await pushContent(currentBranch, releaseType, nextVersion);
@@ -258,7 +283,12 @@ async function createRelease() {
                 ?.createGithubRelease) {
                 return;
             }
-            await createGithubRelease("ccreusat", "simple-release", newTag);
+            await createGithubRelease(currentBranch, {
+                owner: "ccreusat",
+                repo: "simple-release",
+                tag_name: newTag,
+                body: releaseNotes,
+            });
         }
     }
     catch (error) {
