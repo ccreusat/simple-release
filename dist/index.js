@@ -152,6 +152,7 @@ async function updatePackageVersion(nextVersion) {
     try {
         const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
         pkg.version = nextVersion;
+        console.log({ pkg }, pkg.version);
         writeFileSync(new URL("../package.json", import.meta.url), JSON.stringify(pkg, null, 2));
     }
     catch (error) {
