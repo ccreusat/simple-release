@@ -164,13 +164,14 @@ async function getNextVersion(branch, releaseType, versionType) {
     console.log({ branch, releaseType, versionType });
     try {
         let nextVersion;
+        const lastTag = await getLastTag();
         if (releaseType === ReleaseType.Prerelease) {
             nextVersion = semver.inc(pkg.version, "prerelease", branch);
         }
         else {
             nextVersion = semver.inc(pkg.version, versionType);
         }
-        await updatePackageVersion(nextVersion);
+        await updatePackageVersion(lastTag);
         return nextVersion;
     }
     catch (error) {
