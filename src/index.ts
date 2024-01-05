@@ -189,8 +189,6 @@ async function getLastCommits(): Promise<
     const lastTag = await getLastTag();
     const commits = await git.log({ from: lastTag, to: "HEAD" });
 
-    console.log({ commits });
-
     if (commits.all.length === 0)
       throw new Error("No commits found since last tag");
 
@@ -370,7 +368,6 @@ async function pushContent(
   }
 }
 
-// --- Fonction Principale ---
 async function createRelease() {
   const currentBranch = await getCurrentBranch();
   const commits = await getLastCommits();
@@ -380,13 +377,16 @@ async function createRelease() {
   const nextVersion = await getNextVersion(currentBranch, canary, releaseType);
   const lastTag = await getLastTag();
   const newTag = await createTag(config.git.tagPrefix, nextVersion as string);
-  const releaseNotes = "Notes de release..."; // Remplacer par vos notes de release
+  const releaseNotes = "Notes de release...";
+
   console.table({ currentVersion, lastTag, releaseType, nextVersion, commits });
 
   try {
     await updatePackageVersion(nextVersion as string);
-    if (config.git.handle_working_tree)
+
+    if (config.git.handle_working_tree) {
       await pushContent(currentBranch, canary, nextVersion as string);
+    }
 
     if (config.npm.publish) await publishToNpm(currentBranch, canary);
 

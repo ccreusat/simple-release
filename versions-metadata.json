@@ -41,6 +41,38 @@
       "date": "2024-01-05T11:24:44.452Z",
       "notes": "Notes de release...",
       "commits": []
+    },
+    {
+      "version": "1.8.1-alpha.13",
+      "date": "2024-01-05T11:45:37.738Z",
+      "notes": "Notes de release...",
+      "commits": [
+        {
+          "hash": "30ca2e19548cac135ab1f16d6e83f8f9de455e0a",
+          "date": "2024-01-05T12:45:16+01:00",
+          "message": "fix: rename some options",
+          "refs": "HEAD -> alpha, origin/alpha",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        }
+      ]
+    },
+    {
+      "version": "1.8.1-alpha.14",
+      "date": "2024-01-05T11:48:32.754Z",
+      "notes": "Notes de release...",
+      "commits": [
+        {
+          "hash": "4e88e3f61d3959705f9e6128ee18ae917dd62a83",
+          "date": "2024-01-05T12:45:36+01:00",
+          "message": "chore: prerelease: 1.8.1-alpha.13",
+          "refs": "HEAD -> alpha, origin/alpha",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        }
+      ]
     }
   ]
 }
