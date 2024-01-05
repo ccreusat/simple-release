@@ -192,6 +192,8 @@ async function getLastCommits() {
     const lastTag = await getLastTag();
     const commits = await git.log({ from: lastTag, to: "HEAD" });
 
+    console.log({ lastTag, commits });
+
     return commits.all;
   } catch (error) {
     console.error("Something wrong happened:", error);
