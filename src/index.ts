@@ -202,7 +202,7 @@ async function updatePackageVersion(nextVersion: string) {
     );
     pkg.version = nextVersion;
 
-    console.log({ pkg }, pkg.version);
+    console.log({ pkg, nextVersion }, pkg.version);
     writeFileSync(
       new URL("../package.json", import.meta.url),
       JSON.stringify(pkg, null, 2)
