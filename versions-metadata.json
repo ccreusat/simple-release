@@ -89,6 +89,22 @@
           "author_email": "clement.creusat@gmail.com"
         }
       ]
+    },
+    {
+      "version": "1.8.1-alpha.16",
+      "date": "2024-01-05T11:51:57.957Z",
+      "notes": "Notes de release...",
+      "commits": [
+        {
+          "hash": "317458286c67508bb0f384d329fd73e3aba9c089",
+          "date": "2024-01-05T12:51:50+01:00",
+          "message": "feat: prerelease 1.8.1-alpha.15",
+          "refs": "HEAD -> alpha, origin/alpha",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        }
+      ]
     }
   ]
 }
