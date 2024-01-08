@@ -109,6 +109,7 @@ async function createRelease() {
 
     /* await metadataManager.updateMetadataForRelease(
       nextVersion as string,
+      releaseType,
       releaseNotes,
       commits
     ); */

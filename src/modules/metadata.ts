@@ -5,6 +5,7 @@ import { DefaultLogFields, ListLogLine } from "simple-git";
 interface Format {
   version: string;
   date: string;
+  type: string;
   notes: string;
   commits?: readonly (DefaultLogFields & ListLogLine)[];
 }
@@ -35,12 +36,14 @@ export class Metadata {
   async updateMetadataForRelease(
     newVersion: string,
     notes: string,
+    type: string,
     commits?: readonly (DefaultLogFields & ListLogLine)[]
   ) {
     const metadata = this.readMetadata();
 
     const newVersionMetadata: Format = {
       version: newVersion,
+      type,
       date: new Date().toISOString(),
       notes: notes,
       commits: commits,

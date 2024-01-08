@@ -161,10 +161,11 @@ class Metadata {
     writeMetadata(metadata) {
         writeFileSync(this.filePath, JSON.stringify(metadata, null, 2));
     }
-    async updateMetadataForRelease(newVersion, notes, commits) {
+    async updateMetadataForRelease(newVersion, notes, type, commits) {
         const metadata = this.readMetadata();
         const newVersionMetadata = {
             version: newVersion,
+            type,
             date: new Date().toISOString(),
             notes: notes,
             commits: commits,
@@ -323,6 +324,7 @@ async function createRelease() {
         } */
         /* await metadataManager.updateMetadataForRelease(
           nextVersion as string,
+          releaseType,
           releaseNotes,
           commits
         ); */
