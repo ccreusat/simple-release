@@ -20,8 +20,11 @@ export interface ReleaseConfig {
   npm: {
     publish: boolean;
   };
+  changelog: {
+    preset: "conventionalcommits" | "angular";
+  };
   baseBranch: string;
-  releaseBranches: ReleaseBranches[];
+  branches: ReleaseBranches[];
 }
 
 const moduleName = "phnx";
@@ -38,8 +41,11 @@ const defaultConfig: ReleaseConfig = {
   npm: {
     publish: true,
   },
+  changelog: {
+    preset: "conventionalcommits",
+  },
   baseBranch: "main",
-  releaseBranches: [
+  branches: [
     {
       name: "alpha",
       prerelease: true,

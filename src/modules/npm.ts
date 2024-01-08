@@ -9,7 +9,7 @@ export class Npm {
       } else {
         await execa("npm", ["publish"]);
       }
-      console.log("package published to npm");
+      console.log("Package published to npm");
     } catch (error) {
       console.error("Unable to publish to npm", error);
       throw error;

@@ -49,46 +49,9 @@ export class Bump {
     }
   }
 
-  async determineNextVersion(
+  async getNextBump(
     commits: readonly (DefaultLogFields & ListLogLine)[]
   ): Promise<"major" | "minor" | "patch"> {
     return this._analyzeCommits(commits);
   }
-
-  /* async determineVersion(
-    commits: readonly (DefaultLogFields & ListLogLine)[]
-  ): Promise<string> {
-    try {
-      let fixCount = 0;
-      let featCount = 0;
-      let breakingChangeCount = 0;
-
-      commits.forEach((commit) => {
-        if (commit.message.startsWith("feat:")) {
-          featCount++;
-        } else if (commit.message.startsWith("fix:")) {
-          fixCount++;
-        }
-        if (
-          commit.message.includes("BREAKING CHANGE:") ||
-          commit.message.startsWith("BREAKING CHANGE:")
-        ) {
-          breakingChangeCount++;
-        }
-      });
-
-      if (breakingChangeCount > 0) {
-        return "major";
-      } else if (featCount >= fixCount) {
-        return "minor";
-      } else if (fixCount >= featCount) {
-        return "patch";
-      } else {
-        return "";
-      }
-    } catch (error) {
-      console.error("Erreur lors de la détermination de la version:", error);
-      throw error;
-    }
-  } */
 }

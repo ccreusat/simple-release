@@ -8,8 +8,11 @@
     "npm": {
         "publish": false
     },
+    "changelog": {
+        "preset": "conventionalcommits"
+    },
     "baseBranch": "main",
-    "releaseBranches": [
+    "branches": [
         {
             "name": "dev",
             "prerelease": false,

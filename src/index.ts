@@ -9,6 +9,7 @@ import { Npm } from "./modules/npm";
 import { Metadata } from "./modules/metadata";
 import { Bump } from "./modules/bump";
 import { Package } from "./modules/package";
+import { Changelog } from "./modules/changelog";
 
 type Canary = boolean;
 
@@ -48,10 +49,18 @@ async function createRelease() {
   const releaseNotes = "Notes de release...";
 
   try {
-    const currentBranch = await gitManager.getCurrentBranch();
-    const commits = await gitManager.getLastCommits();
-    const canary = await determineCanary(currentBranch);
-    const releaseType = await bumpManager.determineNextVersion(commits);
+    const [currentBranch, commits, lastTag] = await Promise.all([
+      gitManager.getCurrentBranch(),
+      await gitManager.getLastCommits(),
+      await gitManager.getLastTag(),
+    ]);
+
+    const [canary, releaseType, currentVersion] = await Promise.all([
+      determineCanary(currentBranch),
+      bumpManager.getNextBump(commits),
+      packageManager.getCurrentPackageVersion(),
+    ]);
+
     const nextVersion = await bumpManager.getNextVersion(
       pkg,
       currentBranch,
@@ -63,8 +72,6 @@ async function createRelease() {
       throw new Error("Unable to calculate next version.");
     }
 
-    const currentVersion = await packageManager.getCurrentPackageVersion();
-    const lastTag = await gitManager.getLastTag();
     /* const newTag = await gitManager.createTag(
       config.git.tagPrefix,
       nextVersion as string
@@ -137,6 +144,14 @@ async function createRelease() {
 
 // generateChangelog(new Metadata("./versions-metadata.json"));
 
-createRelease()
-  .then(() => console.log("Release terminée avec succès"))
-  .catch((error) => console.error("Erreur lors de la release:", error));
+// createRelease()
+//   .then(() => console.log("Release terminée avec succès"))
+//   .catch((error) => console.error("Erreur lors de la release:", error));
+
+function generateChangelog() {
+  const changelogManager = new Changelog();
+
+  changelogManager.generateFirstChangelog("angular");
+}
+
+generateChangelog();
