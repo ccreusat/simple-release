@@ -2,7 +2,6 @@ import {
   PRERELEASE_BRANCHES,
   RELEASE_BRANCHES,
 } from "./constants/default-branch";
-import { writeFileSync } from "fs";
 
 import { config } from "./config";
 import { Git } from "./modules/git";
@@ -10,7 +9,6 @@ import { Npm } from "./modules/npm";
 import { Metadata } from "./modules/metadata";
 import { Bump } from "./modules/bump";
 import { Package } from "./modules/package";
-import { CommitAnalyzer } from "./modules/analyser";
 
 type Canary = boolean;
 
@@ -44,7 +42,6 @@ async function createRelease() {
   const metadataManager = new Metadata("./versions-metadata.json");
   const bumpManager = new Bump();
   const packageManager = new Package();
-  const analyserManager = new CommitAnalyzer();
 
   const pkg = packageManager.getPackageJson();
 
@@ -119,7 +116,7 @@ async function createRelease() {
   }
 }
 
-function generateChangelog(metadataManager: any) {
+/* function generateChangelog(metadataManager: any) {
   const metadata = metadataManager.readMetadata();
 
   const changelogPath = "./CHANGELOG.md";
@@ -136,7 +133,7 @@ function generateChangelog(metadataManager: any) {
 
   writeFileSync(changelogPath, changelog);
   console.log({ changelog });
-}
+} */
 
 // generateChangelog(new Metadata("./versions-metadata.json"));
 

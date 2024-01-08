@@ -1,8 +1,8 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { cosmiconfigSync } from 'cosmiconfig';
 import { Octokit } from '@octokit/rest';
 import simpleGit from 'simple-git';
 import 'execa';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import semver from 'semver';
 
 const RELEASE_BRANCHES = ["master", "main"];
@@ -334,6 +334,24 @@ async function createRelease() {
         throw error;
     }
 }
+/* function generateChangelog(metadataManager: any) {
+  const metadata = metadataManager.readMetadata();
+
+  const changelogPath = "./CHANGELOG.md";
+
+  const findLastVersion = metadata.versions.find(
+    (info) => info.version === "1.8.1"
+  );
+
+  let changelog = "# Release Note\n\n";
+
+  findLastVersion.commits.forEach((commit) => {
+    changelog += `- ${commit.message}\n`;
+  });
+
+  writeFileSync(changelogPath, changelog);
+  console.log({ changelog });
+} */
 // generateChangelog(new Metadata("./versions-metadata.json"));
 createRelease()
     .then(() => console.log("Release terminée avec succès"))
