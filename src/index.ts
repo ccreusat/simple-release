@@ -20,11 +20,10 @@ async function determineCanary(currentBranch: string): Promise<Canary> {
     } else if (PRERELEASE_BRANCHES.includes(currentBranch)) {
       return true;
     } else if (
-      config.releaseBranches.find((branch) => branch.name === currentBranch)
+      config.branches.find((branch) => branch.name === currentBranch)
     ) {
-      return config.releaseBranches.find(
-        (branch) => branch.name === currentBranch
-      )?.prerelease
+      return config.branches.find((branch) => branch.name === currentBranch)
+        ?.prerelease
         ? true
         : false;
     }
@@ -43,6 +42,7 @@ async function createRelease() {
   const metadataManager = new Metadata("./versions-metadata.json");
   const bumpManager = new Bump();
   const packageManager = new Package();
+  const changelogManager = new Changelog();
 
   const pkg = packageManager.getPackageJson();
 
@@ -67,6 +67,9 @@ async function createRelease() {
       canary,
       releaseType
     );
+
+    if (!canary)
+      await changelogManager.updateChangelog(config.changelog.preset);
 
     if (!nextVersion) {
       throw new Error("Unable to calculate next version.");
@@ -144,14 +147,14 @@ async function createRelease() {
 
 // generateChangelog(new Metadata("./versions-metadata.json"));
 
-// createRelease()
-//   .then(() => console.log("Release terminée avec succès"))
-//   .catch((error) => console.error("Erreur lors de la release:", error));
+createRelease()
+  .then(() => console.log("Release terminée avec succès"))
+  .catch((error) => console.error("Erreur lors de la release:", error));
 
 function generateChangelog() {
   const changelogManager = new Changelog();
 
-  changelogManager.generateFirstChangelog("angular");
+  changelogManager.updateChangelog("angular");
 }
 
-generateChangelog();
+// generateChangelog();

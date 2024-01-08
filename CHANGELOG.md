@@ -1,6 +1,24 @@
 ## [1.8.2-alpha.0](https://github.com/ccreusat/simple-release/compare/v1.8.1...v1.8.2-alpha.0) (2024-01-08)
 
 
+### Bug Fixes
+
+* move analyzer to bump module ([3f4d98a](https://github.com/ccreusat/simple-release/commit/3f4d98a72e7d3d6d75b3c5ba6df0d37afe18688e))
+
+
+### Features
+
+* add changelog manager ([898eb00](https://github.com/ccreusat/simple-release/commit/898eb0081bf61680ebe578a39421eb6c5f073eb5))
+
+
+
+## 1.8.2-alpha.0 (2024-01-08)
+
+
+
+## [1.8.2-alpha.0](https://github.com/ccreusat/simple-release/compare/v1.8.1...v1.8.2-alpha.0) (2024-01-08)
+
+
 
 ## [1.8.1](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.16...v1.8.1) (2024-01-05)
 
