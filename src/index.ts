@@ -147,14 +147,14 @@ async function createRelease() {
 
 // generateChangelog(new Metadata("./versions-metadata.json"));
 
-createRelease()
-  .then(() => console.log("Release terminée avec succès"))
-  .catch((error) => console.error("Erreur lors de la release:", error));
+// createRelease()
+//   .then(() => console.log("Release terminée avec succès"))
+//   .catch((error) => console.error("Erreur lors de la release:", error));
 
-function generateChangelog() {
+async function generateChangelog() {
   const changelogManager = new Changelog();
 
-  changelogManager.updateChangelog("angular");
+  await changelogManager.generateFirstChangelog("angular");
 }
 
-// generateChangelog();
+generateChangelog();

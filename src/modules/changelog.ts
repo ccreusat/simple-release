@@ -12,6 +12,7 @@ export class Changelog {
         "CHANGELOG.md",
         "-s",
         "--skip-unstable",
+        "--tag-prefix v",
         "-r 0",
       ]);
     } catch (error) {
@@ -28,6 +29,7 @@ export class Changelog {
         "CHANGELOG.md",
         "-s",
         "--skip-unstable",
+        "--tag-prefix v",
       ]);
     } catch (error) {
       throw error;
