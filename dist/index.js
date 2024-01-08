@@ -337,9 +337,13 @@ async function createRelease() {
             nextVersion,
             commits,
         });
-        if (config.git.handle_working_tree) {
-            await gitManager.pushChanges(currentBranch, canary, nextVersion);
-        }
+        /* if (config.git.handle_working_tree) {
+          await gitManager.pushChanges(
+            currentBranch,
+            canary,
+            nextVersion as string
+          );
+        } */
         console.log(await analyserManager.determineNextVersion(commits));
         // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
         /* if (config.github?.createGithubRelease) {

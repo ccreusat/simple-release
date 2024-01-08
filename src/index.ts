@@ -2,7 +2,7 @@ import {
   PRERELEASE_BRANCHES,
   RELEASE_BRANCHES,
 } from "./constants/default-branch";
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 
 import { config } from "./config";
 import { Git } from "./modules/git";
@@ -81,13 +81,13 @@ async function createRelease() {
       commits,
     });
 
-    if (config.git.handle_working_tree) {
+    /* if (config.git.handle_working_tree) {
       await gitManager.pushChanges(
         currentBranch,
         canary,
         nextVersion as string
       );
-    }
+    } */
 
     console.log(await analyserManager.determineNextVersion(commits));
 
