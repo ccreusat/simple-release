@@ -105,6 +105,67 @@
           "author_email": "clement.creusat@gmail.com"
         }
       ]
+    },
+    {
+      "version": "1.8.1",
+      "date": "2024-01-05T11:54:05.602Z",
+      "notes": "Notes de release...",
+      "commits": [
+        {
+          "hash": "ccc9c06ea411a28d03db26da5465e27a505cc3b0",
+          "date": "2024-01-05T12:53:55+01:00",
+          "message": "fix: update phnx configuration file",
+          "refs": "HEAD -> dev, origin/dev",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "ee4b110d16c9a6495f40154f8aa1d7fa1955730f",
+          "date": "2024-01-05T12:53:31+01:00",
+          "message": "fix: update phnx configuration file",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "a026429f450284c28f6b703a5c7d0fb5c6cf82bf",
+          "date": "2024-01-05T12:53:08+01:00",
+          "message": "Merge branch 'alpha' into dev",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "81cb33fca584d905ca980eb147a706ff42a05d1e",
+          "date": "2024-01-05T12:52:12+01:00",
+          "message": "fix: update",
+          "refs": "origin/alpha, alpha",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "2f4aa704c157820e40450ad02320d101a60e9e92",
+          "date": "2024-01-04T17:51:11+01:00",
+          "message": "chore: release: 1.8.0",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "d22a5f36841653e4d236d6173ebdc2337b428f23",
+          "date": "2024-01-04T17:49:28+01:00",
+          "message": "chore: release: 1.7.0",
+          "refs": "tag: v1.8.0",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        }
+      ]
     }
   ]
 }
