@@ -175,6 +175,27 @@ class Metadata {
 }
 
 class Bump {
+    _analyzeCommits(commits) {
+        let hasBreaking = false;
+        let hasFeatures = false;
+        commits.forEach((commit) => {
+            if (/BREAKING CHANGE:/.test(commit.message) ||
+                commit.message.startsWith("perf:")) {
+                hasBreaking = true;
+            }
+            else if (commit.message.startsWith("feat:")) {
+                hasFeatures = true;
+            }
+            else if (commit.message.match(/\w+\(.*\)\!:|\w+!\:/)) {
+                hasBreaking = true;
+            }
+        });
+        if (hasBreaking)
+            return "major";
+        if (hasFeatures)
+            return "minor";
+        return "patch";
+    }
     async getNextVersion(pkg, branch, canary, releaseType) {
         try {
             let nextVersion;
@@ -191,40 +212,8 @@ class Bump {
             throw error;
         }
     }
-    async determineVersion(commits) {
-        try {
-            let fixCount = 0;
-            let featCount = 0;
-            let breakingChangeCount = 0;
-            commits.forEach((commit) => {
-                if (commit.message.startsWith("feat:")) {
-                    featCount++;
-                }
-                else if (commit.message.startsWith("fix:")) {
-                    fixCount++;
-                }
-                if (commit.message.includes("BREAKING CHANGE:") ||
-                    commit.message.startsWith("BREAKING CHANGE:")) {
-                    breakingChangeCount++;
-                }
-            });
-            if (breakingChangeCount > 0) {
-                return "major";
-            }
-            else if (featCount >= fixCount) {
-                return "minor";
-            }
-            else if (fixCount >= featCount) {
-                return "patch";
-            }
-            else {
-                return "";
-            }
-        }
-        catch (error) {
-            console.error("Erreur lors de la détermination de la version:", error);
-            throw error;
-        }
+    async determineNextVersion(commits) {
+        return this._analyzeCommits(commits);
     }
 }
 
@@ -260,33 +249,6 @@ class Package {
     }
 }
 
-class CommitAnalyzer {
-    _analyzeCommits(commits) {
-        let hasBreaking = false;
-        let hasFeatures = false;
-        commits.forEach((commit) => {
-            if (/BREAKING CHANGE:/.test(commit.message) ||
-                commit.message.startsWith("perf:")) {
-                hasBreaking = true;
-            }
-            else if (commit.message.startsWith("feat:")) {
-                hasFeatures = true;
-            }
-            else if (commit.message.match(/\w+\(.*\)\!:|\w+!\:/)) {
-                hasBreaking = true;
-            }
-        });
-        if (hasBreaking)
-            return "major";
-        if (hasFeatures)
-            return "minor";
-        return "patch";
-    }
-    async determineNextVersion(commits) {
-        return this._analyzeCommits(commits);
-    }
-}
-
 async function determineCanary(currentBranch) {
     try {
         if (RELEASE_BRANCHES.includes(currentBranch)) {
@@ -312,13 +274,12 @@ async function createRelease() {
     new Metadata("./versions-metadata.json");
     const bumpManager = new Bump();
     const packageManager = new Package();
-    const analyserManager = new CommitAnalyzer();
     const pkg = packageManager.getPackageJson();
     try {
         const currentBranch = await gitManager.getCurrentBranch();
         const commits = await gitManager.getLastCommits();
         const canary = await determineCanary(currentBranch);
-        const releaseType = await bumpManager.determineVersion(commits);
+        const releaseType = await bumpManager.determineNextVersion(commits);
         const nextVersion = await bumpManager.getNextVersion(pkg, currentBranch, canary, releaseType);
         if (!nextVersion) {
             throw new Error("Unable to calculate next version.");
@@ -344,7 +305,6 @@ async function createRelease() {
             nextVersion as string
           );
         } */
-        console.log(await analyserManager.determineNextVersion(commits));
         // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
         /* if (config.github?.createGithubRelease) {
           if (

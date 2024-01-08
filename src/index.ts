@@ -54,7 +54,7 @@ async function createRelease() {
     const currentBranch = await gitManager.getCurrentBranch();
     const commits = await gitManager.getLastCommits();
     const canary = await determineCanary(currentBranch);
-    const releaseType = await bumpManager.determineVersion(commits);
+    const releaseType = await bumpManager.determineNextVersion(commits);
     const nextVersion = await bumpManager.getNextVersion(
       pkg,
       currentBranch,
@@ -88,8 +88,6 @@ async function createRelease() {
         nextVersion as string
       );
     } */
-
-    console.log(await analyserManager.determineNextVersion(commits));
 
     // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
 
