@@ -155,7 +155,7 @@ async function generateChangelog() {
   const changelogManager = new Changelog();
 
   await changelogManager.generateFirstChangelog(
-    "conventionalcommits",
+    config.changelog.preset,
     config.git.tagPrefix
   );
 }

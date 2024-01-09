@@ -1,18 +1,4 @@
-## [1.8.2-alpha.0](https://github.com/ccreusat/simple-release/compare/v1.8.1...v1.8.2-alpha.0) (2024-01-09)
-
-
-### Features
-
-* add changelog manager ([898eb00](https://github.com/ccreusat/simple-release/commit/898eb0081bf61680ebe578a39421eb6c5f073eb5))
-
-
-### Bug Fixes
-
-* add changelog update with preset config ([6f9fe08](https://github.com/ccreusat/simple-release/commit/6f9fe08e812302701e6f97bb15fde4e907d04223))
-* move analyzer to bump module ([3f4d98a](https://github.com/ccreusat/simple-release/commit/3f4d98a72e7d3d6d75b3c5ba6df0d37afe18688e))
-* update changelog module ([d3ff65c](https://github.com/ccreusat/simple-release/commit/d3ff65cc84ba129c330bd503e03cbd87c5178427))
-
-## 1.8.2-alpha.0 (2024-01-08)
+## [1.8.2-alpha.0](https://github.com/ccreusat/simple-release/compare/v1.8.1...v1.8.2-alpha.0) (2024-01-08)
 
 
 ### ⚠ BREAKING CHANGES
@@ -23,7 +9,7 @@
 
 * update ([ce40e09](https://github.com/ccreusat/simple-release/commit/ce40e09ee026c80d51c43069768e1ec5bace6c33))
 
-## [1.8.1](https://github.com/ccreusat/simple-release/compare/v1.8.0...v1.8.1) (2024-01-05)
+## [1.8.1](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.16...v1.8.1) (2024-01-05)
 
 
 ### Bug Fixes
@@ -32,99 +18,73 @@
 * update phnx configuration file ([ccc9c06](https://github.com/ccreusat/simple-release/commit/ccc9c06ea411a28d03db26da5465e27a505cc3b0))
 * update phnx configuration file ([ee4b110](https://github.com/ccreusat/simple-release/commit/ee4b110d16c9a6495f40154f8aa1d7fa1955730f))
 
-## 1.8.1-alpha.16 (2024-01-05)
+## [1.8.0](https://github.com/ccreusat/simple-release/compare/v1.7.0...v1.8.0) (2024-01-04)
+
+## [1.8.1-alpha.16](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.15...v1.8.1-alpha.16) (2024-01-05)
 
 
 ### Features
 
 * prerelease 1.8.1-alpha.15 ([3174582](https://github.com/ccreusat/simple-release/commit/317458286c67508bb0f384d329fd73e3aba9c089))
 
-## 1.8.1-alpha.15 (2024-01-05)
+## [1.8.1-alpha.15](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.14...v1.8.1-alpha.15) (2024-01-05)
 
 
 ### Bug Fixes
 
 * update ([f380579](https://github.com/ccreusat/simple-release/commit/f380579e1cf702e1a719030af764454aeb91c102))
 
-## 1.8.1-alpha.14 (2024-01-05)
+## [1.8.1-alpha.14](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.13...v1.8.1-alpha.14) (2024-01-05)
 
-## 1.8.1-alpha.13 (2024-01-05)
+## [1.8.1-alpha.13](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.12...v1.8.1-alpha.13) (2024-01-05)
 
 
 ### Bug Fixes
 
 * rename some options ([30ca2e1](https://github.com/ccreusat/simple-release/commit/30ca2e19548cac135ab1f16d6e83f8f9de455e0a))
 
-## 1.8.1-alpha.12 (2024-01-05)
+## [1.8.1-alpha.12](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.9...v1.8.1-alpha.12) (2024-01-05)
 
 
 ### Bug Fixes
 
 * update last commits fn ([395370e](https://github.com/ccreusat/simple-release/commit/395370e0c614505d8049cbd271862c6d4c5258d2))
 
-## 1.8.1-alpha.9 (2024-01-05)
+## [1.8.1-alpha.9](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.11...v1.8.1-alpha.9) (2024-01-05)
 
-## 1.8.1-alpha.8 (2024-01-05)
+## [1.8.1-alpha.8](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.7...v1.8.1-alpha.8) (2024-01-05)
 
-## 1.8.1-alpha.7 (2024-01-05)
+## [1.8.1-alpha.7](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.6...v1.8.1-alpha.7) (2024-01-05)
 
-## 1.8.1-alpha.6 (2024-01-05)
+## [1.8.1-alpha.6](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.5...v1.8.1-alpha.6) (2024-01-05)
 
-## 1.8.1-alpha.4 (2024-01-05)
+## [1.8.1-alpha.4](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.3...v1.8.1-alpha.4) (2024-01-05)
 
-## 1.8.1-alpha.3 (2024-01-05)
+## [1.8.1-alpha.3](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.2...v1.8.1-alpha.3) (2024-01-05)
 
-## 1.8.1-alpha.2 (2024-01-05)
+## [1.8.1-alpha.2](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.1...v1.8.1-alpha.2) (2024-01-05)
 
-## 1.8.1-alpha.1 (2024-01-05)
+## [1.8.1-alpha.1](https://github.com/ccreusat/simple-release/compare/v1.8.1-alpha.0...v1.8.1-alpha.1) (2024-01-05)
 
-## 1.8.1-alpha.0 (2024-01-05)
+## [1.8.1-alpha.0](https://github.com/ccreusat/simple-release/compare/v1.6.1-alpha.7...v1.8.1-alpha.0) (2024-01-05)
 
-## 1.6.1-alpha.7 (2024-01-05)
+## [1.6.1-alpha.7](https://github.com/ccreusat/simple-release/compare/v1.6.1-alpha.6...v1.6.1-alpha.7) (2024-01-05)
 
-## 1.6.1-alpha.6 (2024-01-05)
+## [1.6.1-alpha.6](https://github.com/ccreusat/simple-release/compare/v1.6.1-alpha.5...v1.6.1-alpha.6) (2024-01-05)
 
-## 1.6.1-alpha.5 (2024-01-05)
+## [1.6.1-alpha.5](https://github.com/ccreusat/simple-release/compare/v1.6.1-alpha.4...v1.6.1-alpha.5) (2024-01-05)
 
-## 1.6.1-alpha.4 (2024-01-05)
+## [1.6.1-alpha.4](https://github.com/ccreusat/simple-release/compare/v1.6.1-alpha.3...v1.6.1-alpha.4) (2024-01-05)
 
-## 1.6.1-alpha.3 (2024-01-05)
+## [1.6.1-alpha.3](https://github.com/ccreusat/simple-release/compare/v1.8.0...v1.6.1-alpha.3) (2024-01-05)
 
 ## [1.8.0](https://github.com/ccreusat/simple-release/compare/v1.7.0...v1.8.0) (2024-01-04)
 
-## [1.7.0](https://github.com/ccreusat/simple-release/compare/v1.6.0...v1.7.0) (2024-01-04)
+## [1.7.0](https://github.com/ccreusat/simple-release/compare/v1.6.1-alpha.2...v1.7.0) (2024-01-04)
 
-## 1.6.1-alpha.1 (2024-01-04)
+## [1.6.1-alpha.1](https://github.com/ccreusat/simple-release/compare/v1.6.1-alpha.0...v1.6.1-alpha.1) (2024-01-04)
 
-## 1.6.1-alpha.0 (2024-01-04)
-
-## 1.5.4-beta.1 (2024-01-04)
-
-## 1.5.4-beta.0 (2024-01-04)
-
-## 1.5.4-alpha.19 (2024-01-04)
-
-## 1.5.4-alpha.18 (2024-01-04)
-
-## 1.5.4-alpha.17 (2024-01-04)
-
-## 1.5.4-alpha.16 (2024-01-04)
-
-## 1.5.4-alpha.15 (2024-01-04)
-
-## 1.5.4-alpha.14 (2024-01-04)
-
-## 1.5.4-alpha.13 (2024-01-04)
-
-## 1.5.4-alpha.12 (2024-01-04)
-
-## 1.5.4-alpha.8 (2024-01-04)
-
-## 1.5.4-alpha.7 (2024-01-04)
-
-## 1.5.4-alpha.1 (2024-01-04)
-
-## 1.5.4-alpha.0 (2024-01-04)
+## [1.6.1-alpha.0](https://github.com/ccreusat/simple-release/compare/v1.6.0...v1.6.1-alpha.0) (2024-01-04)
 
 ## [1.5.2](https://github.com/ccreusat/simple-release/compare/v1.5.1...v1.5.2) (2024-01-01)
 
@@ -167,13 +127,47 @@
 
 * add fn notes ([ea2d6b5](https://github.com/ccreusat/simple-release/commit/ea2d6b5f1cac74443bd97e9922e1c4e0c902b397))
 
+## [1.5.4-beta.1](https://github.com/ccreusat/simple-release/compare/v1.5.4-beta.0...v1.5.4-beta.1) (2024-01-04)
+
+## [1.5.4-beta.0](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.19...v1.5.4-beta.0) (2024-01-04)
+
+## [1.5.4-alpha.19](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.18...v1.5.4-alpha.19) (2024-01-04)
+
+## [1.5.4-alpha.18](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.17...v1.5.4-alpha.18) (2024-01-04)
+
+## [1.5.4-alpha.17](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.16...v1.5.4-alpha.17) (2024-01-04)
+
+## [1.5.4-alpha.16](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.15...v1.5.4-alpha.16) (2024-01-04)
+
+## [1.5.4-alpha.15](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.14...v1.5.4-alpha.15) (2024-01-04)
+
+## [1.5.4-alpha.14](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.13...v1.5.4-alpha.14) (2024-01-04)
+
+## [1.5.4-alpha.13](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.12...v1.5.4-alpha.13) (2024-01-04)
+
+## [1.5.4-alpha.12](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.8...v1.5.4-alpha.12) (2024-01-04)
+
+## [1.5.4-alpha.8](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.7...v1.5.4-alpha.8) (2024-01-04)
+
+## [1.5.4-alpha.7](https://github.com/ccreusat/simple-release/compare/1.5.4-alpha.6undefined...v1.5.4-alpha.7) (2024-01-04)
+
+## [1.5.4-alpha.6undefined](https://github.com/ccreusat/simple-release/compare/1.5.4-alpha.5...1.5.4-alpha.6undefined) (2024-01-04)
+
+## [1.5.4-alpha.5](https://github.com/ccreusat/simple-release/compare/1.5.4-alpha.4...1.5.4-alpha.5) (2024-01-04)
+
+## [1.5.4-alpha.4](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.1...1.5.4-alpha.4) (2024-01-04)
+
+## [1.5.4-alpha.1](https://github.com/ccreusat/simple-release/compare/v1.5.4-alpha.0...v1.5.4-alpha.1) (2024-01-04)
+
+## [1.5.4-alpha.0](https://github.com/ccreusat/simple-release/compare/v1.5.4-0...v1.5.4-alpha.0) (2024-01-04)
+
 ## [1.5.4-0](https://github.com/ccreusat/simple-release/compare/v1.5.3...v1.5.4-0) (2024-01-04)
 
-## [1.5.3](https://github.com/ccreusat/simple-release/compare/v1.5.2...v1.5.3) (2024-01-04)
+## [1.5.3](https://github.com/ccreusat/simple-release/compare/v1.5.3-alpha.3...v1.5.3) (2024-01-04)
 
-## 1.5.3-alpha.3 (2024-01-04)
+## [1.5.3-alpha.3](https://github.com/ccreusat/simple-release/compare/v1.5.3-alpha.2...v1.5.3-alpha.3) (2024-01-04)
 
-## 1.5.3-alpha.2 (2024-01-04)
+## [1.5.3-alpha.2](https://github.com/ccreusat/simple-release/compare/v1.5.3-alpha.1...v1.5.3-alpha.2) (2024-01-04)
 
 
 ### Bug Fixes
@@ -182,20 +176,20 @@
 * split fn updatePackage and npmVersion ([06dd7f9](https://github.com/ccreusat/simple-release/commit/06dd7f982ca3912546e39c5a91146e139468a48f))
 * split fn updatePackage and npmVersion ([6232d45](https://github.com/ccreusat/simple-release/commit/6232d45709395376e55b76928d25d793ea15da39))
 
-## 1.5.3-alpha.1 (2024-01-03)
+## [1.5.3-alpha.1](https://github.com/ccreusat/simple-release/compare/v1.5.3-alpha.0...v1.5.3-alpha.1) (2024-01-03)
 
-## 1.5.3-alpha.0 (2024-01-03)
+## [1.5.3-alpha.0](https://github.com/ccreusat/simple-release/compare/v1.0.0-alpha.13...v1.5.3-alpha.0) (2024-01-03)
 
 
 ### Features
 
 * improve lib ([8e10808](https://github.com/ccreusat/simple-release/commit/8e10808ea664b3b406ce0c772bf69b2c186df568))
 
-## 1.0.0-alpha.13 (2024-01-03)
+## [1.0.0-alpha.13](https://github.com/ccreusat/simple-release/compare/v1.0.0-alpha.12...v1.0.0-alpha.13) (2024-01-03)
 
-## 1.0.0-alpha.12 (2024-01-03)
+## [1.0.0-alpha.12](https://github.com/ccreusat/simple-release/compare/v1.0.0-alpha.11...v1.0.0-alpha.12) (2024-01-03)
 
-## 1.0.0-alpha.11 (2024-01-03)
+## [1.0.0-alpha.11](https://github.com/ccreusat/simple-release/compare/v1.5.2...v1.0.0-alpha.11) (2024-01-03)
 
 
 ### Features
@@ -243,18 +237,18 @@
 
 * add fn notes ([ea2d6b5](https://github.com/ccreusat/simple-release/commit/ea2d6b5f1cac74443bd97e9922e1c4e0c902b397))
 
-## [1.0.0](https://github.com/ccreusat/simple-release/compare/v0.0.2...v1.0.0) (2023-12-31)
+## [1.0.0](https://github.com/ccreusat/simple-release/compare/v1.0.0-alpha.10...v1.0.0) (2023-12-31)
 
-## 1.0.0-alpha.10 (2023-12-31)
+## [1.0.0-alpha.10](https://github.com/ccreusat/simple-release/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2023-12-31)
 
 
 ### Bug Fixes
 
 * update ([034caa4](https://github.com/ccreusat/simple-release/commit/034caa49dbafdaf5f40c825801b43371f2e85e98))
 
-## 1.0.0-alpha.9 (2023-12-31)
+## [1.0.0-alpha.9](https://github.com/ccreusat/simple-release/compare/v1.0.0-alpha.8...v1.0.0-alpha.9) (2023-12-31)
 
-## 0.0.1-alpha.10 (2023-12-31)
+## [0.0.1-alpha.10](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.9...v0.0.1-alpha.10) (2023-12-31)
 
 
 ### ⚠ BREAKING CHANGES
@@ -272,11 +266,11 @@
 * update ([0f07a7c](https://github.com/ccreusat/simple-release/commit/0f07a7cb9ac1a64dd23ec4a53c5d278b5b5f005a))
 * update ([cceccec](https://github.com/ccreusat/simple-release/commit/cceccec5acad64cff3c5a18045f4e585f90a81b6))
 
-## 0.0.1-alpha.9 (2023-12-29)
+## [0.0.1-alpha.9](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.8...v0.0.1-alpha.9) (2023-12-29)
 
-## 0.0.1-alpha.8 (2023-12-29)
+## [0.0.1-alpha.8](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.7...v0.0.1-alpha.8) (2023-12-29)
 
-## 0.0.1-alpha.7 (2023-12-29)
+## [0.0.1-alpha.7](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.6...v0.0.1-alpha.7) (2023-12-29)
 
 
 ### Features
@@ -291,14 +285,14 @@
 * correct moduleName phnx ([c053a2d](https://github.com/ccreusat/simple-release/commit/c053a2d7b28f5e16058369d588e43b695ca9258d))
 * fix vite.config file ([4ff6c77](https://github.com/ccreusat/simple-release/commit/4ff6c7756c209ab022cc03f225cc2ae5f1a6f987))
 
-## 0.0.1-alpha.6 (2023-12-28)
+## [0.0.1-alpha.6](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.5...v0.0.1-alpha.6) (2023-12-28)
 
 
 ### Features
 
 * add typescript and rollup ([88f059c](https://github.com/ccreusat/simple-release/commit/88f059ca96686b6c3e52c2ac300b49ac396e6aac))
 
-## 0.0.1-alpha.5 (2023-12-27)
+## [0.0.1-alpha.5](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.4...v0.0.1-alpha.5) (2023-12-27)
 
 
 ### Bug Fixes
@@ -310,28 +304,28 @@
 * update prerelease.js ([a7c9e90](https://github.com/ccreusat/simple-release/commit/a7c9e906d386fdab7b839e205eb801da68eb1384))
 * update prerelease.js ([182b8d4](https://github.com/ccreusat/simple-release/commit/182b8d4fa13ef03eedc805563fcebe46a9d6b4db))
 
-## 0.0.1-alpha.4 (2023-12-27)
+## [0.0.1-alpha.4](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.3...v0.0.1-alpha.4) (2023-12-27)
 
 
 ### Bug Fixes
 
 * update index.js ([eb06804](https://github.com/ccreusat/simple-release/commit/eb0680405a638a88691d50c2d5eae605e232d412))
 
-## 0.0.1-alpha.3 (2023-12-27)
+## [0.0.1-alpha.3](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.2...v0.0.1-alpha.3) (2023-12-27)
 
 
 ### Bug Fixes
 
 * update index.js ([9833563](https://github.com/ccreusat/simple-release/commit/9833563e226c4d9c8f4320eaf7b7cb2e172ad8f1))
 
-## 0.0.1-alpha.2 (2023-12-27)
+## [0.0.1-alpha.2](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.1...v0.0.1-alpha.2) (2023-12-27)
 
 
 ### Bug Fixes
 
 * update index.js ([ffd33b0](https://github.com/ccreusat/simple-release/commit/ffd33b0bb209a1e47f292fc8e703728714078cac))
 
-## 0.0.1-alpha.1 (2023-12-27)
+## [0.0.1-alpha.1](https://github.com/ccreusat/simple-release/compare/v0.0.1-alpha.0...v0.0.1-alpha.1) (2023-12-27)
 
 
 ### Bug Fixes
@@ -340,7 +334,7 @@
 * update index.js ([3a9f67b](https://github.com/ccreusat/simple-release/commit/3a9f67b7bf8cfcf6c6ebbb09b4a768448713416d))
 * update index.js ([820aeef](https://github.com/ccreusat/simple-release/commit/820aeef68147224c5441ae17256eccc4a662f13a))
 
-## 0.0.1-alpha.0 (2023-12-27)
+## [0.0.1-alpha.0](https://github.com/ccreusat/simple-release/compare/1.5.2...v0.0.1-alpha.0) (2023-12-27)
 
 
 ### Features

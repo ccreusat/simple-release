@@ -57,12 +57,10 @@ class Changelog {
                 "-i",
                 "CHANGELOG.md",
                 "-s",
-                "--skip-unstable",
-                "--tag-prefix",
-                `${customPrefix}`,
-                "-r",
-                "0",
+                `--tag-prefix ${customPrefix}`,
+                "-r 0",
             ]);
+            // conventional-changelog -p conventionalcommits --skip-unstable --tag-prefix v -i CHANGELOG.md -s -r 0
         }
         catch (error) {
             throw error;
@@ -111,6 +109,6 @@ class Changelog {
 //   .catch((error) => console.error("Erreur lors de la release:", error));
 async function generateChangelog() {
     const changelogManager = new Changelog();
-    await changelogManager.generateFirstChangelog("conventionalcommits", config.git.tagPrefix);
+    await changelogManager.generateFirstChangelog(config.changelog.preset, config.git.tagPrefix);
 }
 generateChangelog();
