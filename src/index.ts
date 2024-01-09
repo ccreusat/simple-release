@@ -154,7 +154,7 @@ async function createRelease() {
 async function generateChangelog() {
   const changelogManager = new Changelog();
 
-  await changelogManager.generateFirstChangelog(
+  await changelogManager.updateChangelog(
     config.changelog.preset,
     config.git.tagPrefix
   );

@@ -109,6 +109,6 @@ class Changelog {
 //   .catch((error) => console.error("Erreur lors de la release:", error));
 async function generateChangelog() {
     const changelogManager = new Changelog();
-    await changelogManager.generateFirstChangelog(config.changelog.preset, config.git.tagPrefix);
+    await changelogManager.updateChangelog(config.changelog.preset, config.git.tagPrefix);
 }
 generateChangelog();
