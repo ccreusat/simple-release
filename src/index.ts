@@ -154,7 +154,10 @@ async function createRelease() {
 async function generateChangelog() {
   const changelogManager = new Changelog();
 
-  await changelogManager.generateFirstChangelog("angular");
+  await changelogManager.generateFirstChangelog(
+    "conventionalcommits",
+    config.git.tagPrefix
+  );
 }
 
 generateChangelog();

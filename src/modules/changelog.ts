@@ -1,35 +1,42 @@
 import { execa } from "execa";
 
 export class Changelog {
-  async generateFirstChangelog(preset: "angular" | "conventionalcommits") {
-    console.log("inside");
-
+  async generateFirstChangelog(
+    preset: "angular" | "conventionalcommits",
+    customPrefix?: string
+  ) {
     try {
-      execa("conventional-changelog", [
+      await execa("conventional-changelog", [
         "-p",
         `${preset}`,
         "-i",
         "CHANGELOG.md",
         "-s",
         "--skip-unstable",
-        "--tag-prefix v",
-        "-r 0",
+        "--tag-prefix",
+        `${customPrefix}`,
+        "-r",
+        "0",
       ]);
     } catch (error) {
       throw error;
     }
   }
 
-  async updateChangelog(preset: "angular" | "conventionalcommits") {
+  async updateChangelog(
+    preset: "angular" | "conventionalcommits",
+    customPrefix?: string
+  ) {
     try {
-      execa("conventional-changelog", [
+      await execa("conventional-changelog", [
         "-p",
         `${preset}`,
         "-i",
         "CHANGELOG.md",
         "-s",
         "--skip-unstable",
-        "--tag-prefix v",
+        "--tag-prefix",
+        `${customPrefix}`,
       ]);
     } catch (error) {
       throw error;

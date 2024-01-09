@@ -52,6 +52,9 @@ dependencies:
     version: 1.0.2
 
 devDependencies:
+  '@types/conventional-changelog-core':
+    specifier: ^4.2.7
+    version: 4.2.7
   '@types/node':
     specifier: 20.10.5
     version: 20.10.5
@@ -61,6 +64,12 @@ devDependencies:
   conventional-changelog-cli:
     specifier: ^4.1.0
     version: 4.1.0
+  conventional-changelog-core:
+    specifier: ^7.0.0
+    version: 7.0.0
+  spdx-license-ids:
+    specifier: ^3.0.16
+    version: 3.0.16
   typescript:
     specifier: 5.2.2
     version: 5.2.2
@@ -289,9 +298,47 @@ packages:
       picomatch: 2.3.1
     dev: false
 
+  /@types/conventional-changelog-core@4.2.7:
+    resolution: {integrity: sha512-owT5zzi5tfWkck1DC000YEs/yzNgTs1NGj3D2+SofHgGFNQAFeurz6uc/5di+ygSBu+CuHgHXbAkchdmCc9RuQ==}
+    dependencies:
+      '@types/conventional-changelog-writer': 4.0.10
+      '@types/conventional-commits-parser': 3.0.6
+      '@types/conventional-recommended-bump': 9.0.3
+      '@types/git-raw-commits': 2.0.4
+      '@types/node': 20.10.5
+      '@types/normalize-package-data': 2.4.4
+    dev: true
+
+  /@types/conventional-changelog-writer@4.0.10:
+    resolution: {integrity: sha512-EK654IW1SBqTZSzN9+PlB6SKSYlDhsrCv1olfeEXvt/FHcmd7kvFWW0cFvMtnWalR/D7baYzY3FJ2TSt7UUySg==}
+    dependencies:
+      '@types/conventional-commits-parser': 3.0.6
+      '@types/node': 20.10.5
+    dev: true
+
+  /@types/conventional-commits-parser@3.0.6:
+    resolution: {integrity: sha512-z4crlplLzL9uA5kbE4ZghAf5RbrEr1UL/uNGGgxYbJjI0jRBjuYKuasbo13ANZsSapLTM2DLZk6LDcjemow4qQ==}
+    dependencies:
+      '@types/node': 20.10.5
+    dev: true
+
+  /@types/conventional-recommended-bump@9.0.3:
+    resolution: {integrity: sha512-rOZiRkTRNAPAqBotvm8+VTzILJMnMuad52/VhSjOVTP9Mrn3K+EiSeii/YC/FiPTp2mBTo45D9I3H6z6+EOfsw==}
+    dependencies:
+      '@types/conventional-changelog-core': 4.2.7
+      '@types/conventional-changelog-writer': 4.0.10
+      '@types/conventional-commits-parser': 3.0.6
+    dev: true
+
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
     dev: false
+
+  /@types/git-raw-commits@2.0.4:
+    resolution: {integrity: sha512-PYmTK156j6TilbwtnO2JErH4TCC1izpgP3kRE3KUX35bjBOD2A+syCGeercqHXBcM6wL+DU0WbJB2Gz8fPR+8A==}
+    dependencies:
+      '@types/node': 20.10.5
+    dev: true
 
   /@types/node@20.10.5:
     resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}

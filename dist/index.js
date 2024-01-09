@@ -41,42 +41,44 @@ const defaultConfig = {
         },
     ],
 };
-({
+const config = {
     ...defaultConfig,
     ...userConfig?.config,
-});
+};
 
 new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 class Changelog {
-    async generateFirstChangelog(preset) {
-        console.log("inside");
+    async generateFirstChangelog(preset, customPrefix) {
         try {
-            execa("conventional-changelog", [
+            await execa("conventional-changelog", [
                 "-p",
                 `${preset}`,
                 "-i",
                 "CHANGELOG.md",
                 "-s",
                 "--skip-unstable",
-                "--tag-prefix v",
-                "-r 0",
+                "--tag-prefix",
+                `${customPrefix}`,
+                "-r",
+                "0",
             ]);
         }
         catch (error) {
             throw error;
         }
     }
-    async updateChangelog(preset) {
+    async updateChangelog(preset, customPrefix) {
         try {
-            execa("conventional-changelog", [
+            await execa("conventional-changelog", [
                 "-p",
                 `${preset}`,
                 "-i",
                 "CHANGELOG.md",
                 "-s",
                 "--skip-unstable",
-                "--tag-prefix v",
+                "--tag-prefix",
+                `${customPrefix}`,
             ]);
         }
         catch (error) {
@@ -109,6 +111,6 @@ class Changelog {
 //   .catch((error) => console.error("Erreur lors de la release:", error));
 async function generateChangelog() {
     const changelogManager = new Changelog();
-    await changelogManager.generateFirstChangelog("angular");
+    await changelogManager.generateFirstChangelog("conventionalcommits", config.git.tagPrefix);
 }
 generateChangelog();
