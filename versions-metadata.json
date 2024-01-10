@@ -379,6 +379,131 @@
           "author_email": "clement.creusat@gmail.com"
         }
       ]
+    },
+    {
+      "version": "1.8.2-alpha.2",
+      "type": "Notes de release...",
+      "date": "2024-01-10T18:16:53.858Z",
+      "notes": "major",
+      "commits": [
+        {
+          "hash": "ca63e21b1f916161a2a9e7495e46b09c66fafcca",
+          "date": "2024-01-09T18:27:38+01:00",
+          "message": "fix: generate changelog",
+          "refs": "HEAD -> alpha, origin/dev, dev",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "9d2bdec115a10a3f5510ac62d60ae104ed4d3710",
+          "date": "2024-01-09T15:37:41+01:00",
+          "message": "fix: update changelog with config",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "bc4c072e1df3fbe93152642bb1ded1dfa4b58d3b",
+          "date": "2024-01-09T15:33:26+01:00",
+          "message": "fix: inverse order tagPrefix/preset",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "d3ff65cc84ba129c330bd503e03cbd87c5178427",
+          "date": "2024-01-08T19:57:09+01:00",
+          "message": "fix: update changelog module",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "6f9fe08e812302701e6f97bb15fde4e907d04223",
+          "date": "2024-01-08T19:45:05+01:00",
+          "message": "fix: add changelog update with preset config",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "898eb0081bf61680ebe578a39421eb6c5f073eb5",
+          "date": "2024-01-08T19:42:27+01:00",
+          "message": "feat: add changelog manager",
+          "refs": "origin/beta, beta",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "3f4d98a72e7d3d6d75b3c5ba6df0d37afe18688e",
+          "date": "2024-01-08T19:04:05+01:00",
+          "message": "fix: move analyzer to bump module",
+          "refs": "origin/alpha",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "9ff16e78925084afae7a9ef35a237981804ba28d",
+          "date": "2024-01-08T19:02:54+01:00",
+          "message": "fix!:add releaseType to metadata",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "ffe1071266ae4fe8528792c2351e91dcaf3488e2",
+          "date": "2024-01-08T19:00:31+01:00",
+          "message": "chore: update alpha",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "f2177c4c2100798a021e59ce5548362706c4f52f",
+          "date": "2024-01-08T18:57:33+01:00",
+          "message": "chore: update alpha",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "e04b6aad4757b8843fc1f1ef270b74a87300710d",
+          "date": "2024-01-08T18:55:56+01:00",
+          "message": "chore: update beta",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "ce40e09ee026c80d51c43069768e1ec5bace6c33",
+          "date": "2024-01-08T18:54:06+01:00",
+          "message": "fix!: update",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        },
+        {
+          "hash": "70aea1e24da00f8ac41c23d31814cdd9d7b28d2d",
+          "date": "2024-01-05T12:54:03+01:00",
+          "message": "chore: release: 1.8.1",
+          "refs": "",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        }
+      ]
     }
   ]
 }
