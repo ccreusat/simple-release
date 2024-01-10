@@ -32,7 +32,6 @@ export class Changelog {
         "-i",
         "CHANGELOG.md",
         "-s",
-        "--skip-unstable",
         "--tag-prefix",
         `${customPrefix}`,
       ]);

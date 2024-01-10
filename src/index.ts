@@ -69,7 +69,7 @@ async function createRelease() {
     );
 
     if (!canary) {
-      await changelogManager.updateChangelog(
+      await changelogManager.generateFirstChangelog(
         config.changelog.preset,
         config.git.tagPrefix
       );
@@ -154,17 +154,17 @@ async function createRelease() {
 
 // generateChangelog(new Metadata("./versions-metadata.json"));
 
-createRelease()
-  .then(() => console.log("Release terminée avec succès"))
-  .catch((error) => console.error("Erreur lors de la release:", error));
+// createRelease()
+//   .then(() => console.log("Release terminée avec succès"))
+//   .catch((error) => console.error("Erreur lors de la release:", error));
 
 async function generateChangelog() {
   const changelogManager = new Changelog();
 
-  await changelogManager.updateChangelog(
+  await changelogManager.generateFirstChangelog(
     config.changelog.preset,
     config.git.tagPrefix
   );
 }
 
-/* generateChangelog(); */
+generateChangelog();
