@@ -68,18 +68,22 @@ async function createRelease() {
       releaseType
     );
 
-    if (!canary)
-      await changelogManager.updateChangelog(config.changelog.preset);
+    if (!canary) {
+      await changelogManager.updateChangelog(
+        config.changelog.preset,
+        config.git.tagPrefix
+      );
+    }
 
     if (!nextVersion) {
       throw new Error("Unable to calculate next version.");
     }
 
-    /* const newTag = await gitManager.createTag(
-      config.git.tagPrefix,
-      nextVersion as string
-    ); */
-    // await packageManager.updatePackageVersion(nextVersion as string);
+    /* const newTag =
+      !!canary &&
+      (await gitManager.createTag(config.git.tagPrefix, nextVersion as string)); */
+
+    await packageManager.updatePackageVersion(nextVersion as string);
     console.table({
       currentVersion,
       lastTag,
@@ -88,38 +92,41 @@ async function createRelease() {
       commits,
     });
 
-    /* if (config.git.handle_working_tree) {
+    if (config.git.handle_working_tree) {
       await gitManager.pushChanges(
         currentBranch,
         canary,
         nextVersion as string
       );
-    } */
+    }
 
-    // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
+    if (config.npm.publish) await npmManager.publish(currentBranch, canary);
 
-    /* if (config.github?.createGithubRelease) {
-      if (
-        !config.releaseBranches.find((branch) => branch.name === currentBranch)
+    if (!canary && config.github?.createGithubRelease) {
+      /* if (
+        !config.branches.find((branch) => branch.name === currentBranch)
           ?.createGithubRelease
       ) {
         return;
-      }
+      } */
 
       await gitManager.createGithubRelease({
         owner: "ccreusat",
         repo: "simple-release",
-        tag_name: newTag,
+        tag_name: await gitManager.createTag(
+          config.git.tagPrefix,
+          nextVersion as string
+        ),
         body: releaseNotes,
       });
-    } */
+    }
 
-    /* await metadataManager.updateMetadataForRelease(
+    await metadataManager.updateMetadataForRelease(
       nextVersion as string,
       releaseType,
       releaseNotes,
       commits
-    ); */
+    );
   } catch (error) {
     console.error("Erreur globale lors de la création de la release:", error);
     throw error;
@@ -147,9 +154,9 @@ async function createRelease() {
 
 // generateChangelog(new Metadata("./versions-metadata.json"));
 
-// createRelease()
-//   .then(() => console.log("Release terminée avec succès"))
-//   .catch((error) => console.error("Erreur lors de la release:", error));
+createRelease()
+  .then(() => console.log("Release terminée avec succès"))
+  .catch((error) => console.error("Erreur lors de la release:", error));
 
 async function generateChangelog() {
   const changelogManager = new Changelog();
@@ -160,4 +167,4 @@ async function generateChangelog() {
   );
 }
 
-generateChangelog();
+/* generateChangelog(); */

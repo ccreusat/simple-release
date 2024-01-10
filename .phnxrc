@@ -1,12 +1,12 @@
 {
     "git": {
-        "handle_working_tree": false
+        "handle_working_tree": true
     },
     "github": {
-        "createGithubRelease": false
+        "createGithubRelease": true
     },
     "npm": {
-        "publish": false
+        "publish": true
     },
     "changelog": {
         "preset": "conventionalcommits"
@@ -15,23 +15,19 @@
     "branches": [
         {
             "name": "dev",
-            "prerelease": false,
-            "createGithubRelease": true
+            "prerelease": false
         },
         {
             "name": "alpha",
-            "prerelease": true,
-            "createGithubRelease": false
+            "prerelease": true
         },
         {
             "name": "beta",
-            "prerelease": true,
-            "createGithubRelease": false
+            "prerelease": true
         },
         {
             "name": "rc",
-            "prerelease": true,
-            "createGithubRelease": false
+            "prerelease": true
         }
     ]
 }
