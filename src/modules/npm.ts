@@ -21,7 +21,7 @@ export class Npm {
       if (canary) {
         await execa("pnpm", ["publish", "-r", "--tag", branch]);
       } else {
-        await execa("pnpm", ["publish", "-r"]);
+        await execa("pnpm", ["-r", "publish"]);
       }
       console.log("Package published to npm");
     } catch (error) {
