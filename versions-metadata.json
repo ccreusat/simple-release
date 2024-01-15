@@ -647,6 +647,23 @@
           "author_email": "clement.creusat@gmail.com"
         }
       ]
+    },
+    {
+      "version": "2.0.1",
+      "type": "Notes de release...",
+      "date": "2024-01-15T10:24:57.507Z",
+      "notes": "patch",
+      "commits": [
+        {
+          "hash": "f9e2b4062dffdef9f4ee1ff5006e4ac92aa64dda",
+          "date": "2024-01-10T19:44:33+01:00",
+          "message": "chore: update changelog",
+          "refs": "HEAD -> dev, tag: @simple-release/core@1.0.1, tag: @simple-release/components@1.0.1, origin/dev, alpha",
+          "body": "",
+          "author_name": "Clement Creusat",
+          "author_email": "clement.creusat@gmail.com"
+        }
+      ]
     }
   ]
 }

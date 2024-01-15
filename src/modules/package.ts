@@ -4,14 +4,13 @@ export class Package {
   private basePath: string;
 
   constructor(basePath: string = "../") {
-    // Chemin par défaut pour polyrepo
     this.basePath = basePath;
   }
 
-  getPath() {
+  getPath(path?: string) {
     const pkg = JSON.parse(
       readFileSync(
-        new URL(`${this.basePath}/package.json`, import.meta.url),
+        new URL(`${path ? path : this.basePath}/package.json`, import.meta.url),
         "utf8"
       )
     );
@@ -19,7 +18,7 @@ export class Package {
     return pkg;
   }
 
-  getCurrentPackageVersion(): string {
+  version(): string {
     try {
       const pkg = this.getPath();
 
@@ -34,19 +33,17 @@ export class Package {
     }
   }
 
-  writePackageJson(pkg: any) {
-    writeFileSync(
-      new URL("../package.json", import.meta.url),
-      JSON.stringify(pkg, null, 2)
-    );
-  }
-
-  async updatePackageVersion(nextVersion: string) {
+  async update(nextVersion: string, path?: string) {
     try {
       const pkg = this.getPath();
+
+      console.log("path pkg", { pkg });
       pkg.version = nextVersion;
 
-      this.writePackageJson(pkg);
+      writeFileSync(
+        new URL(`${path ? path : this.basePath}/package.json`, import.meta.url),
+        JSON.stringify(pkg, null, 2)
+      );
     } catch (error) {
       console.error("Erreur", error);
       throw error;

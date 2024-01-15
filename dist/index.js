@@ -3,6 +3,8 @@ import simpleGit from 'simple-git';
 import { execa } from 'execa';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import semver from 'semver';
+import { existsSync as existsSync$1, readdirSync, statSync, readFileSync as readFileSync$1 } from 'node:fs';
+import path from 'node:path';
 import { Octokit } from '@octokit/rest';
 
 const RELEASE_BRANCHES = ["master", "main"];
@@ -159,25 +161,6 @@ class Git {
     }
 }
 
-// npmManager.ts
-class Npm {
-    async publish(branch, canary) {
-        try {
-            if (canary) {
-                await execa("npm", ["publish", "--tag", branch]);
-            }
-            else {
-                await execa("npm", ["publish"]);
-            }
-            console.log("Package published to npm");
-        }
-        catch (error) {
-            console.error("Unable to publish to npm", error);
-            throw error;
-        }
-    }
-}
-
 // metadataManager.ts
 class Metadata {
     constructor(filePath) {
@@ -268,14 +251,13 @@ class Package {
             writable: true,
             value: void 0
         });
-        // Chemin par défaut pour polyrepo
         this.basePath = basePath;
     }
-    getPath() {
-        const pkg = JSON.parse(readFileSync(new URL(`${this.basePath}/package.json`, import.meta.url), "utf8"));
+    getPath(path) {
+        const pkg = JSON.parse(readFileSync(new URL(`${path ? path : this.basePath}/package.json`, import.meta.url), "utf8"));
         return pkg;
     }
-    getCurrentPackageVersion() {
+    version() {
         try {
             const pkg = this.getPath();
             const packageVersion = pkg.version;
@@ -286,14 +268,12 @@ class Package {
             throw error;
         }
     }
-    writePackageJson(pkg) {
-        writeFileSync(new URL("../package.json", import.meta.url), JSON.stringify(pkg, null, 2));
-    }
-    async updatePackageVersion(nextVersion) {
+    async update(nextVersion, path) {
         try {
             const pkg = this.getPath();
+            console.log("path pkg", { pkg });
             pkg.version = nextVersion;
-            this.writePackageJson(pkg);
+            writeFileSync(new URL(`${path ? path : this.basePath}/package.json`, import.meta.url), JSON.stringify(pkg, null, 2));
         }
         catch (error) {
             console.error("Erreur", error);
@@ -338,27 +318,72 @@ class Changelog {
     }
 }
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-class Github {
-    async createGithubRelease({ owner = "ccreusat", repo = "simple-release", tag_name, body, }) {
+class Monorepo {
+    constructor(packagePath = "packages") {
+        Object.defineProperty(this, "packagePath", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        this.packagePath = packagePath;
+    }
+    isMonorepo() {
+        const folder = this.getPath();
+        if (existsSync$1(folder)) {
+            return existsSync$1(folder);
+        }
+        else {
+            return !existsSync$1(folder);
+        }
+    }
+    getPackagePath() {
+        return this.packagePath;
+    }
+    getPath() {
+        return path.join(`${process.cwd()}/src`, this.packagePath);
+    }
+    getSubfolders() {
+        const dir = this.getPath();
+        const subFolders = readdirSync(dir).filter((folder) => {
+            const fullPath = path.join(dir, folder);
+            return statSync(fullPath).isDirectory();
+        });
+        return subFolders;
+    }
+    getPackageName(pkg) {
+        return pkg.name;
+    }
+    getPackageVersion(pkg) {
+        return pkg.version;
+    }
+    getCurrentPackageVersion(pkg) {
         try {
-            await octokit.repos.createRelease({
-                owner,
-                repo,
-                tag_name,
-                name: tag_name,
-                body,
-                draft: false,
-                // prerelease: (await determineCanary(currentBranch)) === true,
-            });
-            console.log("Release GitHub créée avec succès");
+            const packageVersion = pkg.version;
+            return packageVersion;
         }
         catch (error) {
-            console.error("Erreur lors de la création de la release GitHub:", error);
+            console.error("Erreur lors de la lecture de la version actuelle du package", error);
             throw error;
         }
     }
+    findPackageJson() {
+        const dir = this.getPath();
+        const folders = this.getSubfolders();
+        let pkgs = [];
+        for (const folder of folders) {
+            const fullPath = path.join(dir, folder);
+            statSync(fullPath);
+            //if (!stat.isDirectory()) return;
+            const pkg = JSON.parse(readFileSync$1(`${fullPath}/package.json`, "utf8"));
+            pkgs.push(pkg);
+        }
+        // console.log({ pkgs });
+        return pkgs;
+    }
 }
+
+new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 async function determineCanary(currentBranch) {
     try {
@@ -381,71 +406,80 @@ async function determineCanary(currentBranch) {
         throw error;
     }
 }
-async function createRelease() {
+/* createRelease()
+  .then(() => console.log("Release terminée avec succès"))
+  .catch((error) => console.error("Erreur lors de la release:", error)); */
+async function createMonorepoRelease() {
     const gitManager = new Git();
-    const npmManager = new Npm();
-    const metadataManager = new Metadata("./versions-metadata.json");
+    new Metadata("./versions-metadata.json");
     const bumpManager = new Bump();
     const packageManager = new Package();
     const changelogManager = new Changelog();
-    const githubManager = new Github();
-    const pkg = packageManager.getPath();
-    console.log({ pkg });
-    const releaseNotes = "Notes de release...";
-    try {
-        const [currentBranch, commits, lastTag] = await Promise.all([
-            gitManager.getCurrentBranch(),
-            await gitManager.getLastCommits(),
-            await gitManager.getLastTag(),
-        ]);
-        const [canary, releaseType, currentVersion] = await Promise.all([
-            determineCanary(currentBranch),
-            bumpManager.getNextBump(commits),
-            packageManager.getCurrentPackageVersion(),
-        ]);
-        const nextVersion = await bumpManager.getNextVersion(pkg, currentBranch, canary, releaseType);
-        if (!canary) {
-            await changelogManager.generateFirstChangelog(config.changelog.preset, config.git.tagPrefix);
-        }
-        if (!nextVersion) {
-            throw new Error("Unable to calculate next version.");
-        }
-        /* const newTag =
-          !canary &&
-          (await gitManager.createTag(config.git.tagPrefix, nextVersion as string)); */
-        await packageManager.updatePackageVersion(nextVersion);
-        console.table({
-            currentVersion,
-            lastTag,
-            releaseType,
-            nextVersion,
-            commits,
-        });
-        if (config.git.enable) {
-            await gitManager.pushChanges(currentBranch, canary, nextVersion);
-        }
-        if (config.npm.publish)
-            await npmManager.publish(currentBranch, canary);
-        if (!canary && config.github?.createGithubRelease) {
-            await githubManager.createGithubRelease({
+    const monorepoManager = new Monorepo();
+    const folders = monorepoManager.getSubfolders();
+    const dir = monorepoManager.getPath();
+    for (const folder of folders) {
+        const fullPath = path.join(dir, folder);
+        const pkg = packageManager.getPath(fullPath);
+        // console.log({ pkg });
+        try {
+            const [currentBranch, commits, lastTag] = await Promise.all([
+                gitManager.getCurrentBranch(),
+                gitManager.getLastCommits(),
+                gitManager.getLastTag(),
+            ]);
+            const [canary, releaseType] = await Promise.all([
+                determineCanary(currentBranch),
+                bumpManager.getNextBump(commits),
+            ]);
+            const currentVersion = packageManager.version();
+            const nextVersion = await bumpManager.getNextVersion(pkg, currentBranch, canary, releaseType);
+            if (!canary) {
+                await changelogManager.generateFirstChangelog(config.changelog.preset, config.git.tagPrefix);
+            }
+            if (!nextVersion) {
+                throw new Error("Unable to calculate next version.");
+            }
+            // await packageManager.update(nextVersion as string);
+            console.table({
+                currentVersion,
+                lastTag,
+                releaseType,
+                nextVersion,
+                commits,
+            });
+            /* if (config.git.enable) {
+              await gitManager.pushChanges(
+                currentBranch,
+                canary,
+                nextVersion as string
+              );
+            } */
+            // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
+            /* if (!canary && config.github?.createGithubRelease) {
+              await githubManager.createGithubRelease({
                 owner: "ccreusat",
                 repo: "simple-release",
-                tag_name: await gitManager.createTag(config.git.tagPrefix, nextVersion),
+                tag_name: await gitManager.createTag(
+                  config.git.tagPrefix,
+                  nextVersion as string
+                ),
                 body: releaseNotes,
-            });
+              });
+            } */
+            /* await metadataManager.updateMetadataForRelease(
+              nextVersion as string,
+              releaseType,
+              releaseNotes,
+              commits
+            ); */
         }
-        await metadataManager.updateMetadataForRelease(nextVersion, releaseType, releaseNotes, commits);
-    }
-    catch (error) {
-        console.error("Erreur globale lors de la création de la release:", error);
-        throw error;
+        catch (error) {
+            console.error("Erreur globale lors de la création de la release:", error);
+            throw error;
+        }
     }
 }
-// generateChangelog(new Metadata("./versions-metadata.json"));
-createRelease()
+createMonorepoRelease()
     .then(() => console.log("Release terminée avec succès"))
     .catch((error) => console.error("Erreur lors de la release:", error));
-// generateChangelog()
-/* createMonorepoRelease()
-  .then(() => console.log("Release terminée avec succès"))
-  .catch((error) => console.error("Erreur lors de la release:", error)); */
