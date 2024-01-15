@@ -1,6 +1,6 @@
 import { cosmiconfigSync } from 'cosmiconfig';
 import simpleGit from 'simple-git';
-import 'execa';
+import { execa } from 'execa';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import semver from 'semver';
 import { existsSync as existsSync$1, readdirSync, statSync, readFileSync as readFileSync$1 } from 'node:fs';
@@ -156,6 +156,25 @@ class Git {
         }
         catch (error) {
             console.error(error);
+            throw error;
+        }
+    }
+}
+
+// npmManager.ts
+class Npm {
+    async publish(branch, canary) {
+        try {
+            if (canary) {
+                await execa("npm", ["publish", "--tag", branch]);
+            }
+            else {
+                await execa("npm", ["publish"]);
+            }
+            console.log("Package published to npm");
+        }
+        catch (error) {
+            console.error("Unable to publish to npm", error);
             throw error;
         }
     }
@@ -342,7 +361,27 @@ class Monorepo {
     }
 }
 
-new Octokit({ auth: process.env.GITHUB_TOKEN });
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+class Github {
+    async createGithubRelease({ owner = "ccreusat", repo = "simple-release", tag_name, body, }) {
+        try {
+            await octokit.repos.createRelease({
+                owner,
+                repo,
+                tag_name,
+                name: tag_name,
+                body,
+                draft: false,
+                // prerelease: (await determineCanary(currentBranch)) === true,
+            });
+            console.log("Release GitHub créée avec succès");
+        }
+        catch (error) {
+            console.error("Erreur lors de la création de la release GitHub:", error);
+            throw error;
+        }
+    }
+}
 
 async function determineCanary(currentBranch) {
     try {
@@ -370,10 +409,15 @@ async function determineCanary(currentBranch) {
   .catch((error) => console.error("Erreur lors de la release:", error)); */
 async function createMonorepoRelease() {
     const gitManager = new Git();
+    const npmManager = new Npm();
     new Metadata("./versions-metadata.json");
     const bumpManager = new Bump();
     const packageManager = new Package();
+    const githubManager = new Github();
     const monorepoManager = new Monorepo();
+    // const pkg = packageManager.getPath();
+    // console.log({ pkg });
+    const releaseNotes = "Notes de release...";
     const folders = monorepoManager.getSubfolders();
     const dir = monorepoManager.getPath();
     for (const folder of folders) {
@@ -414,18 +458,16 @@ async function createMonorepoRelease() {
             if (config.git.enable) {
                 await gitManager.pushChanges(currentBranch, canary, nextVersion);
             }
-            // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
-            /* if (!canary && config.github?.createGithubRelease) {
-              await githubManager.createGithubRelease({
-                owner: "ccreusat",
-                repo: "simple-release",
-                tag_name: await gitManager.createTag(
-                  config.git.tagPrefix,
-                  nextVersion as string
-                ),
-                body: releaseNotes,
-              });
-            } */
+            if (config.npm.publish)
+                await npmManager.publish(currentBranch, canary);
+            if (!canary && config.github?.createGithubRelease) {
+                await githubManager.createGithubRelease({
+                    owner: "ccreusat",
+                    repo: "simple-release",
+                    tag_name: await gitManager.createTag(config.git.tagPrefix, nextVersion),
+                    body: releaseNotes,
+                });
+            }
             /* await metadataManager.updateMetadataForRelease(
               nextVersion as string,
               releaseType,

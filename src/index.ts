@@ -211,9 +211,9 @@ async function createMonorepoRelease() {
         );
       }
 
-      // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
+      if (config.npm.publish) await npmManager.publish(currentBranch, canary);
 
-      /* if (!canary && config.github?.createGithubRelease) {
+      if (!canary && config.github?.createGithubRelease) {
         await githubManager.createGithubRelease({
           owner: "ccreusat",
           repo: "simple-release",
@@ -223,7 +223,7 @@ async function createMonorepoRelease() {
           ),
           body: releaseNotes,
         });
-      } */
+      }
 
       /* await metadataManager.updateMetadataForRelease(
         nextVersion as string,
