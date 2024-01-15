@@ -181,10 +181,10 @@ class Npm {
     async publishPackage(branch, canary) {
         try {
             if (canary) {
-                await execa("npm", ["publish", "workspace", "--tag", branch]);
+                await execa("pnpm", ["publish", "workspace", "--tag", branch]);
             }
             else {
-                await execa("npm", ["publish", "workspace"]);
+                await execa("pnpm", ["publish", "workspace"]);
             }
             console.log("Package published to npm");
         }

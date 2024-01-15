@@ -19,9 +19,9 @@ export class Npm {
   async publishPackage(branch: string, canary: boolean) {
     try {
       if (canary) {
-        await execa("npm", ["publish", "workspace", "--tag", branch]);
+        await execa("pnpm", ["publish", "workspace", "--tag", branch]);
       } else {
-        await execa("npm", ["publish", "workspace"]);
+        await execa("pnpm", ["publish", "workspace"]);
       }
       console.log("Package published to npm");
     } catch (error) {
