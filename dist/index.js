@@ -1,6 +1,6 @@
 import { cosmiconfigSync } from 'cosmiconfig';
 import simpleGit from 'simple-git';
-import { execa } from 'execa';
+import 'execa';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import semver from 'semver';
 import { existsSync as existsSync$1, readdirSync, statSync, readFileSync as readFileSync$1 } from 'node:fs';
@@ -253,68 +253,27 @@ class Package {
         });
         this.basePath = basePath;
     }
-    getPath(path) {
-        const pkg = JSON.parse(readFileSync(new URL(`${path ? path : this.basePath}/package.json`, import.meta.url), "utf8"));
+    getPath(optionalPath) {
+        const path = optionalPath || this.basePath;
+        const pkg = JSON.parse(readFileSync(new URL(`${path}/package.json`, import.meta.url), "utf8"));
         return pkg;
     }
-    version() {
-        try {
-            const pkg = this.getPath();
-            const packageVersion = pkg.version;
-            return packageVersion;
-        }
-        catch (error) {
-            console.error("Erreur lors de la lecture de la version actuelle du package", error);
-            throw error;
-        }
+    name(optionalPath) {
+        const pkg = this.getPath(optionalPath);
+        console.log("path pkg", { pkg });
+        return pkg.name;
     }
-    async update(nextVersion, path) {
-        try {
-            const pkg = this.getPath();
-            console.log("path pkg", { pkg });
-            pkg.version = nextVersion;
-            writeFileSync(new URL(`${path ? path : this.basePath}/package.json`, import.meta.url), JSON.stringify(pkg, null, 2));
-        }
-        catch (error) {
-            console.error("Erreur", error);
-            throw error;
-        }
+    version(optionalPath) {
+        const pkg = this.getPath(optionalPath);
+        console.log("path pkg", { pkg });
+        return pkg.version;
     }
-}
-
-class Changelog {
-    async generateFirstChangelog(preset, customPrefix) {
-        try {
-            await execa("conventional-changelog", [
-                "-p",
-                `${preset}`,
-                "-i",
-                "CHANGELOG.md",
-                "-s",
-                `--tag-prefix ${customPrefix}`,
-                "-r 0",
-            ]);
-            // conventional-changelog -p conventionalcommits --skip-unstable --tag-prefix v -i CHANGELOG.md -s -r 0
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-    async updateChangelog(preset, customPrefix) {
-        try {
-            await execa("conventional-changelog", [
-                "-p",
-                `${preset}`,
-                "-i",
-                "CHANGELOG.md",
-                "-s",
-                "--tag-prefix",
-                `${customPrefix}`,
-            ]);
-        }
-        catch (error) {
-            throw error;
-        }
+    update(nextVersion, optionalPath) {
+        const path = optionalPath || this.basePath;
+        const pkg = this.getPath(optionalPath);
+        pkg.version = nextVersion;
+        console.log(pkg.version, { nextVersion });
+        writeFileSync(new URL(`${path}/package.json`, import.meta.url), JSON.stringify(pkg, null, 2));
     }
 }
 
@@ -414,7 +373,6 @@ async function createMonorepoRelease() {
     new Metadata("./versions-metadata.json");
     const bumpManager = new Bump();
     const packageManager = new Package();
-    const changelogManager = new Changelog();
     const monorepoManager = new Monorepo();
     const folders = monorepoManager.getSubfolders();
     const dir = monorepoManager.getPath();
@@ -432,15 +390,20 @@ async function createMonorepoRelease() {
                 determineCanary(currentBranch),
                 bumpManager.getNextBump(commits),
             ]);
-            const currentVersion = packageManager.version();
+            const currentName = packageManager.name(fullPath);
+            const currentVersion = packageManager.version(fullPath);
+            console.log({ currentName, currentVersion });
             const nextVersion = await bumpManager.getNextVersion(pkg, currentBranch, canary, releaseType);
-            if (!canary) {
-                await changelogManager.generateFirstChangelog(config.changelog.preset, config.git.tagPrefix);
-            }
+            /* if (!canary) {
+              await changelogManager.generateFirstChangelog(
+                config.changelog.preset,
+                config.git.tagPrefix
+              );
+            } */
             if (!nextVersion) {
                 throw new Error("Unable to calculate next version.");
             }
-            // await packageManager.update(nextVersion as string);
+            await packageManager.update(nextVersion, fullPath);
             console.table({
                 currentVersion,
                 lastTag,
@@ -448,13 +411,9 @@ async function createMonorepoRelease() {
                 nextVersion,
                 commits,
             });
-            /* if (config.git.enable) {
-              await gitManager.pushChanges(
-                currentBranch,
-                canary,
-                nextVersion as string
-              );
-            } */
+            if (config.git.enable) {
+                await gitManager.pushChanges(currentBranch, canary, nextVersion);
+            }
             // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
             /* if (!canary && config.github?.createGithubRelease) {
               await githubManager.createGithubRelease({

@@ -7,46 +7,42 @@ export class Package {
     this.basePath = basePath;
   }
 
-  getPath(path?: string) {
+  getPath(optionalPath?: string) {
+    const path = optionalPath || this.basePath;
+
     const pkg = JSON.parse(
-      readFileSync(
-        new URL(`${path ? path : this.basePath}/package.json`, import.meta.url),
-        "utf8"
-      )
+      readFileSync(new URL(`${path}/package.json`, import.meta.url), "utf8")
     );
 
     return pkg;
   }
 
-  version(): string {
-    try {
-      const pkg = this.getPath();
+  name(optionalPath?: string): string {
+    const pkg = this.getPath(optionalPath);
 
-      const packageVersion = pkg.version;
-      return packageVersion;
-    } catch (error) {
-      console.error(
-        "Erreur lors de la lecture de la version actuelle du package",
-        error
-      );
-      throw error;
-    }
+    console.log("path pkg", { pkg });
+
+    return pkg.name;
   }
 
-  async update(nextVersion: string, path?: string) {
-    try {
-      const pkg = this.getPath();
+  version(optionalPath?: string): string {
+    const pkg = this.getPath(optionalPath);
+    console.log("path pkg", { pkg });
 
-      console.log("path pkg", { pkg });
-      pkg.version = nextVersion;
+    return pkg.version;
+  }
 
-      writeFileSync(
-        new URL(`${path ? path : this.basePath}/package.json`, import.meta.url),
-        JSON.stringify(pkg, null, 2)
-      );
-    } catch (error) {
-      console.error("Erreur", error);
-      throw error;
-    }
+  update(nextVersion: string, optionalPath?: string) {
+    const path = optionalPath || this.basePath;
+    const pkg = this.getPath(optionalPath);
+
+    pkg.version = nextVersion;
+
+    console.log(pkg.version, { nextVersion });
+
+    writeFileSync(
+      new URL(`${path}/package.json`, import.meta.url),
+      JSON.stringify(pkg, null, 2)
+    );
   }
 }

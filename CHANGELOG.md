@@ -1,3 +1,5 @@
+## [2.0.1](https://github.com/ccreusat/simple-release/compare/v2.0.0...v2.0.1) (2024-01-15)
+
 ## [2.0.0](https://github.com/ccreusat/simple-release/compare/v1.8.1...v2.0.0) (2024-01-10)
 
 

@@ -151,6 +151,7 @@ async function createMonorepoRelease() {
 
   const folders = monorepoManager.getSubfolders();
   const dir = monorepoManager.getPath();
+
   for (const folder of folders) {
     const fullPath = path.join(dir, folder);
     const pkg = packageManager.getPath(fullPath);
@@ -169,7 +170,10 @@ async function createMonorepoRelease() {
         bumpManager.getNextBump(commits),
       ]);
 
-      const currentVersion = packageManager.version();
+      const currentName = packageManager.name(fullPath);
+      const currentVersion = packageManager.version(fullPath);
+
+      console.log({ currentName, currentVersion });
 
       const nextVersion = await bumpManager.getNextVersion(
         pkg,
@@ -178,18 +182,18 @@ async function createMonorepoRelease() {
         releaseType
       );
 
-      if (!canary) {
+      /* if (!canary) {
         await changelogManager.generateFirstChangelog(
           config.changelog.preset,
           config.git.tagPrefix
         );
-      }
+      } */
 
       if (!nextVersion) {
         throw new Error("Unable to calculate next version.");
       }
 
-      // await packageManager.update(nextVersion as string);
+      await packageManager.update(nextVersion as string, fullPath);
 
       console.table({
         currentVersion,
@@ -199,13 +203,13 @@ async function createMonorepoRelease() {
         commits,
       });
 
-      /* if (config.git.enable) {
+      if (config.git.enable) {
         await gitManager.pushChanges(
           currentBranch,
           canary,
           nextVersion as string
         );
-      } */
+      }
 
       // if (config.npm.publish) await npmManager.publish(currentBranch, canary);
 
