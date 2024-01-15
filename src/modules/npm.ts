@@ -15,4 +15,18 @@ export class Npm {
       throw error;
     }
   }
+
+  async publishPackage(branch: string, canary: boolean) {
+    try {
+      if (canary) {
+        await execa("npm", ["publish", "workspace", "--tag", branch]);
+      } else {
+        await execa("npm", ["publish", "workspace"]);
+      }
+      console.log("Package published to npm");
+    } catch (error) {
+      console.error("Unable to publish to npm", error);
+      throw error;
+    }
+  }
 }

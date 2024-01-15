@@ -178,6 +178,21 @@ class Npm {
             throw error;
         }
     }
+    async publishPackage(branch, canary) {
+        try {
+            if (canary) {
+                await execa("npm", ["publish", "workspace", "--tag", branch]);
+            }
+            else {
+                await execa("npm", ["publish", "workspace"]);
+            }
+            console.log("Package published to npm");
+        }
+        catch (error) {
+            console.error("Unable to publish to npm", error);
+            throw error;
+        }
+    }
 }
 
 // metadataManager.ts
@@ -460,7 +475,7 @@ async function createMonorepoRelease() {
             }
             if (config.npm.publish) {
                 process.chdir(fullPath); // Changer vers le répertoire du sous-package
-                await npmManager.publish(currentBranch, canary);
+                await npmManager.publishPackage(currentBranch, canary);
                 process.chdir(".."); // Revenir au répertoire parent
             }
             if (!canary && config.github?.createGithubRelease) {
