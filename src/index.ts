@@ -10,6 +10,8 @@ import { Metadata } from "./modules/metadata";
 import { Bump } from "./modules/bump";
 import { Package } from "./modules/package";
 import { Changelog } from "./modules/changelog";
+import { Monorepo } from "./modules/monorepo";
+import { Github } from "./modules/github";
 
 type Canary = boolean;
 
@@ -43,8 +45,11 @@ async function createRelease() {
   const bumpManager = new Bump();
   const packageManager = new Package();
   const changelogManager = new Changelog();
+  const githubManager = new Github();
 
-  const pkg = packageManager.getPackageJson();
+  const pkg = packageManager.getPath();
+
+  console.log({ pkg });
 
   const releaseNotes = "Notes de release...";
 
@@ -80,10 +85,11 @@ async function createRelease() {
     }
 
     /* const newTag =
-      !!canary &&
+      !canary &&
       (await gitManager.createTag(config.git.tagPrefix, nextVersion as string)); */
 
     await packageManager.updatePackageVersion(nextVersion as string);
+
     console.table({
       currentVersion,
       lastTag,
@@ -92,7 +98,7 @@ async function createRelease() {
       commits,
     });
 
-    if (config.git.handle_working_tree) {
+    if (config.git.enable) {
       await gitManager.pushChanges(
         currentBranch,
         canary,
@@ -103,14 +109,7 @@ async function createRelease() {
     if (config.npm.publish) await npmManager.publish(currentBranch, canary);
 
     if (!canary && config.github?.createGithubRelease) {
-      /* if (
-        !config.branches.find((branch) => branch.name === currentBranch)
-          ?.createGithubRelease
-      ) {
-        return;
-      } */
-
-      await gitManager.createGithubRelease({
+      await githubManager.createGithubRelease({
         owner: "ccreusat",
         repo: "simple-release",
         tag_name: await gitManager.createTag(
@@ -133,38 +132,23 @@ async function createRelease() {
   }
 }
 
-/* function generateChangelog(metadataManager: any) {
-  const metadata = metadataManager.readMetadata();
-
-  const changelogPath = "./CHANGELOG.md";
-
-  const findLastVersion = metadata.versions.find(
-    (info) => info.version === "1.8.1"
-  );
-
-  let changelog = "# Release Note\n\n";
-
-  findLastVersion.commits.forEach((commit) => {
-    changelog += `- ${commit.message}\n`;
-  });
-
-  writeFileSync(changelogPath, changelog);
-  console.log({ changelog });
-} */
-
 // generateChangelog(new Metadata("./versions-metadata.json"));
 
-// createRelease()
-//   .then(() => console.log("Release terminée avec succès"))
-//   .catch((error) => console.error("Erreur lors de la release:", error));
+createRelease()
+  .then(() => console.log("Release terminée avec succès"))
+  .catch((error) => console.error("Erreur lors de la release:", error));
 
 async function generateChangelog() {
   const changelogManager = new Changelog();
 
-  await changelogManager.generateFirstChangelog(
+  await changelogManager.updateChangelog(
     config.changelog.preset,
     config.git.tagPrefix
   );
 }
 
-generateChangelog();
+// generateChangelog()
+
+/* createMonorepoRelease()
+  .then(() => console.log("Release terminée avec succès"))
+  .catch((error) => console.error("Erreur lors de la release:", error)); */

@@ -1,4 +1,3 @@
-import { Octokit } from "@octokit/rest";
 import simpleGit, {
   DefaultLogFields,
   ListLogLine,
@@ -6,13 +5,41 @@ import simpleGit, {
 } from "simple-git";
 import { config } from "../config";
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
 export class Git {
   private git: SimpleGit;
 
   constructor() {
     this.git = simpleGit();
+  }
+
+  async isInitialized() {
+    try {
+      const isRepo = await this.git.checkIsRepo();
+
+      if (!isRepo) {
+        throw new Error("Le repo n'est pas initialisé.");
+      }
+
+      console.log("Le repo est initialisé.");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getStatus() {
+    try {
+      const status = await this.git.status();
+
+      if (status.files.length !== 0) {
+        throw new Error("Working tree is not clean");
+      }
+
+      console.log("Everything is clear!");
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   async getCurrentBranch() {
@@ -23,6 +50,17 @@ export class Git {
       return currentBranch;
     } catch (error) {
       console.error("Unable to detect the current branch", error);
+      throw error;
+    }
+  }
+
+  async hasTag(tagName: string): Promise<boolean> {
+    try {
+      const tags = await this.git.tags();
+
+      return tags.all.includes(tagName);
+    } catch (error) {
+      console.error(error);
       throw error;
     }
   }
@@ -80,35 +118,6 @@ export class Git {
       return commits.all;
     } catch (error) {
       console.error(error);
-      throw error;
-    }
-  }
-
-  async createGithubRelease({
-    owner = "ccreusat",
-    repo = "simple-release",
-    tag_name,
-    body,
-  }: {
-    owner: string;
-    repo: string;
-    tag_name: string;
-    body: string;
-  }) {
-    try {
-      await octokit.repos.createRelease({
-        owner,
-        repo,
-        tag_name,
-        name: tag_name,
-        body,
-        draft: false,
-        // prerelease: (await determineCanary(currentBranch)) === true,
-      });
-
-      console.log("Release GitHub créée avec succès");
-    } catch (error) {
-      console.error("Erreur lors de la création de la release GitHub:", error);
       throw error;
     }
   }

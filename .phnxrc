@@ -1,6 +1,6 @@
 {
     "git": {
-        "handle_working_tree": true
+        "enable": true
     },
     "github": {
         "createGithubRelease": true

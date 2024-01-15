@@ -49,6 +49,10 @@ export class Bump {
     }
   }
 
+  async forcePatch(pkg: any) {
+    return semver.inc(pkg.version, "patch");
+  }
+
   async getNextBump(
     commits: readonly (DefaultLogFields & ListLogLine)[]
   ): Promise<"major" | "minor" | "patch"> {

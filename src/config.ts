@@ -8,7 +8,7 @@ export interface ReleaseBranches {
 
 export interface ReleaseConfig {
   git: {
-    handle_working_tree: boolean;
+    enable: boolean;
     tagPrefix?: string;
     commit?: {
       message?: string;
@@ -32,7 +32,7 @@ const explorer = cosmiconfigSync(moduleName);
 const userConfig = explorer.search();
 const defaultConfig: ReleaseConfig = {
   git: {
-    handle_working_tree: true,
+    enable: true,
     tagPrefix: "v",
   },
   github: {

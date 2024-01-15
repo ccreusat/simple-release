@@ -1,9 +1,19 @@
 import { readFileSync, writeFileSync } from "fs";
 
 export class Package {
-  getPackageJson() {
+  private basePath: string;
+
+  constructor(basePath: string = "../") {
+    // Chemin par défaut pour polyrepo
+    this.basePath = basePath;
+  }
+
+  getPath() {
     const pkg = JSON.parse(
-      readFileSync(new URL("../package.json", import.meta.url), "utf8")
+      readFileSync(
+        new URL(`${this.basePath}/package.json`, import.meta.url),
+        "utf8"
+      )
     );
 
     return pkg;
@@ -11,13 +21,13 @@ export class Package {
 
   getCurrentPackageVersion(): string {
     try {
-      const pkg = this.getPackageJson();
+      const pkg = this.getPath();
 
       const packageVersion = pkg.version;
       return packageVersion;
     } catch (error) {
       console.error(
-        "Erreur lors de la lecture de la version actuelle du package:",
+        "Erreur lors de la lecture de la version actuelle du package",
         error
       );
       throw error;
@@ -33,7 +43,7 @@ export class Package {
 
   async updatePackageVersion(nextVersion: string) {
     try {
-      const pkg = this.getPackageJson();
+      const pkg = this.getPath();
       pkg.version = nextVersion;
 
       this.writePackageJson(pkg);
