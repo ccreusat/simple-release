@@ -1,6 +1,6 @@
 {
-  "name": "@simple-release/components",
-  "version": "1.0.6",
+  "name": "@phnx-release/components",
+  "version": "1.0.7",
   "description": "",
   "main": "index.js",
   "scripts": {
