@@ -212,9 +212,9 @@ async function createMonorepoRelease() {
       }
 
       if (config.npm.publish) {
-        process.chdir(fullPath); // Changer vers le répertoire du sous-package
+        // process.chdir(fullPath); // Changer vers le répertoire du sous-package
         await npmManager.publishPackage(currentBranch, canary);
-        process.chdir(".."); // Revenir au répertoire parent
+        // process.chdir(".."); // Revenir au répertoire parent
       }
 
       if (!canary && config.github?.createGithubRelease) {

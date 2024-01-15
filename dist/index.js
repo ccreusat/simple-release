@@ -181,10 +181,10 @@ class Npm {
     async publishPackage(branch, canary) {
         try {
             if (canary) {
-                await execa("npm", ["publish", "workspace", "--tag", branch]);
+                await execa("pnpm", ["publish", "-r", "--tag", branch]);
             }
             else {
-                await execa("npm", ["publish", "workspace"]);
+                await execa("pnpm", ["publish", "-r"]);
             }
             console.log("Package published to npm");
         }
@@ -474,9 +474,9 @@ async function createMonorepoRelease() {
                 await gitManager.pushChanges(currentBranch, canary, nextVersion);
             }
             if (config.npm.publish) {
-                process.chdir(fullPath); // Changer vers le répertoire du sous-package
+                // process.chdir(fullPath); // Changer vers le répertoire du sous-package
                 await npmManager.publishPackage(currentBranch, canary);
-                process.chdir(".."); // Revenir au répertoire parent
+                // process.chdir(".."); // Revenir au répertoire parent
             }
             if (!canary && config.github?.createGithubRelease) {
                 await githubManager.createGithubRelease({
