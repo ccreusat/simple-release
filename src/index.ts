@@ -200,7 +200,7 @@ async function createMonorepoRelease() {
         lastTag,
         releaseType,
         nextVersion,
-        commits,
+        // commits,
       });
 
       if (config.git.enable) {

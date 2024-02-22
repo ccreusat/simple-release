@@ -468,7 +468,7 @@ async function createMonorepoRelease() {
                 lastTag,
                 releaseType,
                 nextVersion,
-                commits,
+                // commits,
             });
             if (config.git.enable) {
                 await gitManager.pushChanges(currentBranch, canary, nextVersion);
